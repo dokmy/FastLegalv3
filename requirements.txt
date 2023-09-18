@@ -23,6 +23,7 @@ jsonschema==4.19.0
 jsonschema-specifications==2023.7.1
 langchain==0.0.292
 langsmith==0.0.37
+llama-cpp-python==0.1.9
 llama-index==0.8.28
 markdown-it-py==3.0.0
 MarkupSafe==2.1.3
