@@ -15,7 +15,7 @@ from llama_index.response_synthesizers import get_response_synthesizer
 load_dotenv()
 openai.api_key = os.environ.get("OPENAI_API_KEY")
 
-st.header("Ask me about legal stuff")
+st.header("Ask me about legal stuff!!!")
 
 if "messages" not in st.session_state.keys():
     st.session_state.messages = [
@@ -25,7 +25,9 @@ if "messages" not in st.session_state.keys():
          }
     ]
 
-folder_path = "/Users/adrienkwong/Downloads/FastLegal files/FastLegal - LlamaIndex + Streamlit/data"
+#folder_path = "/Users/adrienkwong/Downloads/FastLegal files/FastLegal - LlamaIndex + Streamlit/data"
+
+folder_path = 'https://github.com/dokmy/FastLegalv3/tree/main/data'
 
 @st.cache_resource(show_spinner=False)
 
