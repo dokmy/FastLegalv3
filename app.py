@@ -13,7 +13,7 @@ from llama_index.query_engine import RetrieverQueryEngine
 from llama_index.response_synthesizers import get_response_synthesizer
 
 load_dotenv()
-openai.api_key = os.environ.get("OPENAI_API_KEY")
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 st.header("Ask me about legal stuff!!!")
 
