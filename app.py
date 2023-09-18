@@ -27,7 +27,7 @@ if "messages" not in st.session_state.keys():
 
 #folder_path = "/Users/adrienkwong/Downloads/FastLegal files/FastLegal - LlamaIndex + Streamlit/data"
 
-folder_path = 'https://github.com/dokmy/FastLegalv3/tree/main/data'
+folder_path = './data'
 
 @st.cache_resource(show_spinner=False)
 
