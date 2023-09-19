@@ -121,7 +121,8 @@ def create_final_query_engine():
     service_context = ServiceContext.from_defaults(llm=llm)
 
     response_synthesizer = get_response_synthesizer(
-        # service_context = service_context,
+        summary_template = "Only answer based on the context given. Do not make up facts or answers.",
+        service_context = service_context,
         response_mode = "tree_summarize"
     )
 
