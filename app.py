@@ -13,6 +13,7 @@ from llama_index.query_engine import RetrieverQueryEngine
 from llama_index.response_synthesizers import get_response_synthesizer
 
 load_dotenv()
+#openai.api_key = os.getenv("OPENAI_API_KEY")
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 st.header("Ask me about legal stuff!!!")
@@ -25,117 +26,118 @@ if "messages" not in st.session_state.keys():
          }
     ]
 
-#folder_path = "/Users/adrienkwong/Downloads/FastLegal files/FastLegal - LlamaIndex + Streamlit/data"
-
-folder_path = './data'
 
 @st.cache_resource(show_spinner=False)
 
-#create IndexNode for each case
-def create_summaries():
-    cases_summaries = {}
-    nodes = []
+#1. create List of Index Node Objects
+def create_list_of_Index_Nodes():
     
+    files = os.listdir('./data')
+    list_of_index_nodes = []
+
+    for file in files:
+        case_number = os.path.splitext(file)[0]
+        file_path = os.path.join('./data', file)
+        
+        #make summary
+        docs = SimpleDirectoryReader(input_files=[file_path]).load_data()
+        index = VectorStoreIndex.from_documents(docs)
+        query_engine = index.as_query_engine()
+        summary = query_engine.query("Please summarise this case for me.")
+        index_node = IndexNode(text=summary.response, index_id=case_number)
+        list_of_index_nodes.append(index_node)
     
-    for filename in os.listdir(folder_path):
-        file_path = os.path.join(folder_path, filename)
-        case_number = os.path.splitext(os.path.basename(file_path))[0]
-        try:
-            docs = SimpleDirectoryReader(input_files=[file_path]).load_data()
-            index = VectorStoreIndex.from_documents(docs)
-            query_engine = index.as_query_engine()
-            summary = query_engine.query("The docuemtns are all about a legal case in Hong Kong. Please summarise the documents. Start by identifying if this case is about work injury, traffic accident or other injuries. Then create at least 10 learnings from this case that can be applied to other legal cases.")
-            cases_summaries[case_number] = summary
-            node = IndexNode(text=str(summary), index_id=case_number)
-            nodes.append(node)
-        except Exception as e:
-             print(f"Error reading {file_path}. Error: {e}")
+    return list_of_index_nodes
 
-    return nodes
+#2. Create Dictionary of Agents
+def create_dict_of_agents():
 
-
-#Create document agent over each case
-def create_agents():
+    files = os.listdir('./data')
+    
     agents = {}
 
-    for filename in os.listdir(folder_path):
-        file_path = os.path.join(folder_path, filename)
-        case_number = os.path.splitext(os.path.basename(file_path))[0]
-        #load each pdf into multiple document objects
+    for file in files:
+        file_path = os.path.join('./data', file)
+        case_number = os.path.splitext(file)[0]
         docs = SimpleDirectoryReader(input_files=[file_path]).load_data()
-        #build vector index
-        vector_index = VectorStoreIndex.from_documents(docs)
-        #build summary index
-        summary_index = SummaryIndex.from_documents(docs)
-        #define query engines
-        vector_query_engine = vector_index.as_query_engine()
-        list_query_engine = summary_index.as_query_engine()
 
-        #define tools
+        #create vector index and query engine
+        vector_index = VectorStoreIndex.from_documents(docs)
+        vector_query_engine = vector_index.as_query_engine()
+
+
+        #create summary index and query engine
+        summary_index = SummaryIndex.from_documents(docs)
+        summary_index_engine = summary_index.as_query_engine()
+
+        #create Query Engine Tool Objects from the two indexes and group them to a list called query_engine_tools
         query_engine_tools = [
             QueryEngineTool(
                 query_engine=vector_query_engine,
                 metadata=ToolMetadata(
-                    name='vector_tool',
-                    description=f"Userful for summarization questions related to {case_number}"
+                    name="vector_tool",
+                    description=f"Useful for retrieving specific context from this legal case with case number: {case_number}"
                 )
             ),
             QueryEngineTool(
-                query_engine=list_query_engine,
+                query_engine=summary_index_engine,
                 metadata=ToolMetadata(
                     name='summary_tool',
-                    description=f"Userful for retrieving specific context from {case_number}"
+                    description=f"Useful for summarization questions related to this legal case with case number: {case_number}"
                 )
             )
         ]
 
-        #build agent
-        function_llm = OpenAI(model='gpt-3.5-turbo-0613')
+        #make an agent from the list called query_engine_tools
+        function_llm = OpenAI(model="gpt-3.5-turbo-0613")
         agent = OpenAIAgent.from_tools(
             query_engine_tools,
-            llm=function_llm,
-            verbose=True
+            llm=function_llm
         )
 
+        #put the agent into the dict of agents
         agents[case_number] = agent
-        return agents
     
+    return agents
 
+
+#3. Create the final query engine
 def create_final_query_engine():
-
-    nodes = create_summaries()
-    agents = create_agents()
-
+    
     #define top-level retriever
-    vector_index = VectorStoreIndex(nodes)
-    vector_retriever = vector_index.as_retriever(similarity_top_k=3)
+    list_of_index_nodes = create_list_of_Index_Nodes()
+    top_level_vector_store = VectorStoreIndex(list_of_index_nodes)
+    top_level_vector_store_retriever = top_level_vector_store.as_retriever(similarity_top_k=1)
 
+    #define agnets
+    agents = create_dict_of_agents()
+
+    #define recursive_retriever for the final_query_engine
     recursive_retriever = RecursiveRetriever(
-    "vector",
-    retriever_dict={"vector": vector_retriever},
-    query_engine_dict = agents,
-    verbose=True
+        "vector",
+        retriever_dict = {"vector": top_level_vector_store_retriever},
+        query_engine_dict=agents,
+        verbose=True
     )
 
+    #define final_query_engine
+    response_synthesizer = get_response_synthesizer(
+        response_mode="compact"
+    )
     llm = OpenAI(temperature=0, model="gpt-3.5-turbo")
     service_context = ServiceContext.from_defaults(llm=llm)
-
-    response_synthesizer = get_response_synthesizer(
-        summary_template = "Only answer based on the context given. Do not make up facts or answers.",
-        service_context = service_context,
-        response_mode = "tree_summarize"
-    )
-
-    query_engine = RetrieverQueryEngine.from_args(
+    final_query_engine = RetrieverQueryEngine.from_args(
         recursive_retriever,
         response_synthesizer=response_synthesizer,
         service_context=service_context
     )
 
-    return query_engine
+    return final_query_engine
 
+final_query_engine = create_final_query_engine()
+# response = final_query_engine.query("Summarise this legal case with case number: DCPI002019_2013")
+# print(response)
 
-chat_engine = create_final_query_engine()
 
 if prompt := st.chat_input("Your question"):
     st.session_state.messages.append({"role": "user", "content": prompt})
@@ -147,7 +149,7 @@ for message in st.session_state.messages:
 if st.session_state.messages[-1]["role"] != "assistant":
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
-            response = chat_engine.query(prompt)
+            response = final_query_engine.query(prompt)
             st.write(response.response)
             message = {"role": "assistant", "content": response.response}
             st.session_state.messages.append(message)
