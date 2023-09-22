@@ -18,7 +18,7 @@ load_dotenv()
 #openai.api_key = os.getenv("OPENAI_API_KEY")
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))
 
 st.header("Ask me about legal stuff!!!")
