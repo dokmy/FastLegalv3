@@ -1,3 +1,5 @@
+import logging
+import sys
 import os
 import openai
 from dotenv import load_dotenv, dotenv_values
@@ -15,6 +17,9 @@ from llama_index.response_synthesizers import get_response_synthesizer
 load_dotenv()
 #openai.api_key = os.getenv("OPENAI_API_KEY")
 openai.api_key = st.secrets["OPENAI_API_KEY"]
+
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+logging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))
 
 st.header("Ask me about legal stuff!!!")
 
@@ -92,7 +97,8 @@ def create_dict_of_agents():
         function_llm = OpenAI(model="gpt-3.5-turbo-0613")
         agent = OpenAIAgent.from_tools(
             query_engine_tools,
-            llm=function_llm
+            llm=function_llm,
+            verbose=True
         )
 
         #put the agent into the dict of agents
