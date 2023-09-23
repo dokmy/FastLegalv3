@@ -15,24 +15,24 @@ from llama_index.query_engine import RetrieverQueryEngine
 from llama_index.response_synthesizers import get_response_synthesizer
 
 load_dotenv()
-#openai.api_key = os.getenv("OPENAI_API_KEY")
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+openai.api_key = os.getenv("OPENAI_API_KEY")
+#openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))
 
-st.header("Ask me about legal stuff!!!")
+# st.header("Ask me about legal stuff!!!")
 
-if "messages" not in st.session_state.keys():
-    st.session_state.messages = [
-        {
-            "role": "assistant", 
-         "content": "Ask me a question about the laws of HK!"
-         }
-    ]
+# if "messages" not in st.session_state.keys():
+#     st.session_state.messages = [
+#         {
+#             "role": "assistant", 
+#          "content": "Ask me a question about the laws of HK!"
+#          }
+#     ]
 
 
-@st.cache_resource(show_spinner=False)
+# @st.cache_resource(show_spinner=False)
 
 #1. create List of Index Node Objects
 def create_list_of_Index_Nodes():
@@ -61,21 +61,18 @@ def create_dict_of_agents():
     
     agents = {}
 
-    llm = OpenAI(temperature=0, model="gpt-3.5-turbo")
-    service_context = ServiceContext.from_defaults(llm=llm)
-
     for file in files:
         file_path = os.path.join('./data', file)
         case_number = os.path.splitext(file)[0]
         docs = SimpleDirectoryReader(input_files=[file_path]).load_data()
 
         #create vector index and query engine
-        vector_index = VectorStoreIndex.from_documents(docs, service_context=service_context)
+        vector_index = VectorStoreIndex.from_documents(docs)
         vector_query_engine = vector_index.as_query_engine()
 
 
         #create summary index and query engine
-        summary_index = SummaryIndex.from_documents(docs, service_context=service_context)
+        summary_index = SummaryIndex.from_documents(docs)
         summary_index_engine = summary_index.as_query_engine()
 
         #create Query Engine Tool Objects from the two indexes and group them to a list called query_engine_tools
@@ -143,22 +140,23 @@ def create_final_query_engine():
 
     return final_query_engine
 
+
 final_query_engine = create_final_query_engine()
-# response = final_query_engine.query("Summarise this legal case with case number: DCPI002019_2013")
-# print(response)
+response = final_query_engine.query("What happened in DCPI002019_2013")
+print(response)
 
 
-if prompt := st.chat_input("Your question"):
-    st.session_state.messages.append({"role": "user", "content": prompt})
+# if prompt := st.chat_input("Your question"):
+#     st.session_state.messages.append({"role": "user", "content": prompt})
 
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.write(message["content"])
+# for message in st.session_state.messages:
+#     with st.chat_message(message["role"]):
+#         st.write(message["content"])
 
-if st.session_state.messages[-1]["role"] != "assistant":
-    with st.chat_message("assistant"):
-        with st.spinner("Thinking..."):
-            response = final_query_engine.query(prompt)
-            st.write(response.response)
-            message = {"role": "assistant", "content": response.response}
-            st.session_state.messages.append(message)
+# if st.session_state.messages[-1]["role"] != "assistant":
+#     with st.chat_message("assistant"):
+#         with st.spinner("Thinking..."):
+#             response = final_query_engine.query(prompt)
+#             st.write(response.response)
+#             message = {"role": "assistant", "content": response.response}
+#             st.session_state.messages.append(message)
