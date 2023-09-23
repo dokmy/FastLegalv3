@@ -46,6 +46,8 @@ def create_list_of_Index_Nodes():
         
         #make summary
         docs = SimpleDirectoryReader(input_files=[file_path]).load_data()
+        for doc in docs:
+            doc.text = doc.text.replace("\n \n  A \n \n \n \nB \n \n \n \nC \n \n \n \nD \n \n \n \nE \n \n \n \nF \n \n \n \nG \n \n \n \nH \n \n \n \nI \n \n \n \nJ \n \n \n \nK \n \n \n \nL \n \n \n \nM \n \n \n \nN \n \n \n \nO \n \n \n \nP \n \n \n \nQ \n \n \n \nR \n \n \n \nS \n \n \n \nT \n \n \n \nU \n \n \n \nV A \n \n \n \nB \n \n \n \nC \n \n \n \nD \n \n \n \nE \n \n \n \nF \n \n \n \nG \n \n \n \nH \n \n \n \nI \n \n \n \nJ \n \n \n \nK \n \n \n \nL \n \n \n \nM \n \n \n \nN \n \n \n \nO \n \n \n \nP \n \n \n \nQ \n \n \n \nR \n \n \n \nS \n \n \n \nT \n \n \n \nU \n \n \n \nV", "")
         index = VectorStoreIndex.from_documents(docs)
         query_engine = index.as_query_engine()
         summary = query_engine.query("Please summarise this case for me.")
@@ -68,6 +70,8 @@ def create_dict_of_agents():
         file_path = os.path.join('./data', file)
         case_number = os.path.splitext(file)[0]
         docs = SimpleDirectoryReader(input_files=[file_path]).load_data()
+        for doc in docs:
+            doc.text = doc.text.replace("\n \n  A \n \n \n \nB \n \n \n \nC \n \n \n \nD \n \n \n \nE \n \n \n \nF \n \n \n \nG \n \n \n \nH \n \n \n \nI \n \n \n \nJ \n \n \n \nK \n \n \n \nL \n \n \n \nM \n \n \n \nN \n \n \n \nO \n \n \n \nP \n \n \n \nQ \n \n \n \nR \n \n \n \nS \n \n \n \nT \n \n \n \nU \n \n \n \nV A \n \n \n \nB \n \n \n \nC \n \n \n \nD \n \n \n \nE \n \n \n \nF \n \n \n \nG \n \n \n \nH \n \n \n \nI \n \n \n \nJ \n \n \n \nK \n \n \n \nL \n \n \n \nM \n \n \n \nN \n \n \n \nO \n \n \n \nP \n \n \n \nQ \n \n \n \nR \n \n \n \nS \n \n \n \nT \n \n \n \nU \n \n \n \nV", "")
 
         #create vector index and query engine
         vector_index = VectorStoreIndex.from_documents(docs, service_context=service_context)
