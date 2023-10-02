@@ -1,0 +1,106 @@
+Date of Hearing: 
+The date of Hearing is 21-24 March 2023.
+
+
+Date of Judgement: 
+17 May 2023
+
+
+Plaintiff and Defendant: 
+The context information does not provide the names of the plaintiff(s) and defendant(s) involved in the case.
+
+
+Judge: 
+Connie Lee
+
+
+Background of Plaintiffs: 
+There is no information provided in the given context about the number of plaintiffs, their gender, age during the accident, age during the trial or assessment of damages, or their occupation before the accident.
+
+
+Background facts of case: 
+- The core questions of the case are mainly questions of fact.
+- There were no eyewitnesses to the accident and no CCTV camera installed in the staircase.
+- The defendants dispute the factual accounts put forward by the plaintiff.
+- The credibility of the witnesses will be important in resolving the disputed factual accounts.
+- The approach for assessing witness credibility includes considering contemporaneous written documents, the inherent likelihood or unlikelihood of events, consistency with undisputed evidence, and internal consistency of the witness's evidence.
+- The plaintiff is the only witness giving evidence for her case.
+- The plaintiff has a limited education and does not know how to read or write well.
+- The plaintiff's Cantonese is not very good and she speaks with a heavy accent.
+- The defendants' counsel has attacked the credibility and reliability of the plaintiff's evidence.
+- Some parts of the plaintiff's evidence are unsatisfactory and confusing.
+- The defendants argue that they should not be held liable for the accident and that the plaintiff's own negligence contributed to it.
+- The defendants also dispute the amount of damages claimed by the plaintiff.
+- The key issues agreed upon by the parties are: whether the accident occurred as alleged, whether it was caused by a wet and slippery substance on the staircase, whether each defendant was liable for the accident, whether there was contributory negligence on the part of the plaintiff, and the quantum of damages payable to the plaintiff.
+
+
+Legal Issues: 
+- The legal issues discussed include the evaluation of available evidence on an objective basis, the credibility of witnesses, the application of the doctrine of res judicata, and the occurrence of the accident.
+- The judge and the lawyers discussed the need to rely on objective evidence rather than self-reported feelings and symptoms, the importance of contemporaneous written documents in assessing credibility, the consistency of a witness's evidence with undisputed or indisputable evidence, and the application of the doctrine of res judicata to bar the defendant from disputing the occurrence of the accident.
+- The judge ruled that the court should evaluate the available evidence objectively and give more weight to the conclusions of the experts when they are consistent with the objective evidence. The judge also ruled that the credibility of witnesses should be assessed based on contemporaneous written documents, the inherent likelihood or unlikelihood of events, and the consistency of the witness's evidence. Furthermore, the judge ruled that the doctrine of res judicata applies to bar the defendant from disputing the occurrence of the accident based on the consent judgment entered in the EC Proceedings.
+
+
+Rulings: 
+The judge made several rulings in the given context. First, the judge ruled that the available evidence should be evaluated on an objective basis, and placed less reliance on the self-reported feelings and symptoms of the plaintiff if they were inconsistent with the conclusions of the experts. The judge also ruled that an expert should discuss both the subjective and objective evidence in an even-handed and fair manner before coming to any conclusion. Additionally, the judge ruled that an expert should not "play advocate" by cherry-picking evidence that supports one side's case without any qualifications. Furthermore, the judge ruled that the doctrine of res judicata applies to bar D1 from disputing the occurrence of the accident in a way that is inconsistent with the consent judgment entered in the EC Proceedings.
+
+
+injury:
+The injuries suffered by the plaintiffs include right wrist injury/condition, right ankle injury/condition, and psychiatric injury/condition.
+
+
+Loss of amenities: 
+There is no information provided in the given context regarding any loss of amenities, such as the ability to engage in social activities, sports, or hobbies for the plaintiff.
+
+
+Medical evidence: 
+The medical evidence for each plaintiff includes:
+- The joint supplemental medical report prepared by Dr. Ko and Dr. Ho.
+- The joint psychiatric report prepared by Dr. Wong Yee Him and Dr. Hung Bing Kei Gabriel.
+
+
+Earnings of plaintiff: 
+The income or earning abilities of each plaintiff are as follows:
+
+- The plaintiff's monthly salary at the time of the accident was HK$8,400.
+- The plaintiff's salary was adjusted to HK$8,824 as of 1 May 2017.
+
+
+Quantum:
+The damages or compensation to be awarded to the plaintiff are as follows:
+
+1. PSLA (Pain, Suffering, and Loss of Amenity): HK$300,000.00
+2. Pre-trial loss of earnings: HK$222,020.40
+3. Future loss of earnings: Nil
+4. Loss of earning capacity: HK$25,500.00
+5. Costs of future medical treatment: HK$1,000.00
+6. Special Damages: HK$78,439.00
+
+The total amount awarded to the plaintiff is HK$626,959.40.
+
+
+Issues related to quantum: 
+The court made the following rulings and provided reasons for each of the heads of damages:
+
+1. PSLA (Pain, Suffering, and Loss of Amenity): The court awarded HK$300,000.00 for this head of damages. The specific reasons and basis for this ruling are not mentioned in the given context.
+
+2. Pre-trial loss of earnings: The court awarded HK$222,020.40 for this head of damages. The specific reasons and basis for this ruling are not mentioned in the given context.
+
+3. Future loss of earnings: The court ruled that there would be no award for future loss of earnings. The specific reasons and basis for this ruling are not mentioned in the given context.
+
+4. Loss of earning capacity: The court awarded HK$25,500.00 for this head of damages. The specific reasons and basis for this ruling are not mentioned in the given context.
+
+5. Costs of future medical treatment: The court awarded HK$1,000.00 for this head of damages. The specific reasons and basis for this ruling are not mentioned in the given context.
+
+6. Special Damages: The court awarded HK$78,439.00 for this head of damages. The specific reasons and basis for this ruling are not mentioned in the given context.
+
+
+Costs: 
+The court ruled that the defendants shall pay the plaintiff's costs of the action, except for the costs of the counterclaim which only the 1st defendant shall pay. The costs order nisi will become absolute if there is no application to vary it within 14 days of the judgment.
+
+
+Legal representation: 
+The legal representative for the plaintiff is Mr. Norman Wong, who is instructed by Szwina Pang, Edward Li & Co. and assigned by the Director of Legal Aid. The lawyer for the defendants is Mr. Simon Wong, who is instructed by Deacons.
+
+
+Accident circumstances: 
+The accident involved the plaintiff slipping and falling on a staircase. It is alleged that the slip was caused by a wet and slippery substance on the staircase. The exact cause of the injury was the plaintiff losing her balance and falling due to the slippery surface.

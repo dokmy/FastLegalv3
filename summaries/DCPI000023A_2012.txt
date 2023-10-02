@@ -1,0 +1,109 @@
+Date of Hearing: 
+The date of hearing is 8, 10 to 11 September 2014 & 16 October 2014.
+
+
+Date of Judgement: 
+31 March 2015
+
+
+Plaintiff and Defendant: 
+The plaintiff in this case is Tsang Chi Cheong. The defendant is The Incorporated Owners of Mei King Mansion (Stage 1).
+
+
+Judge: 
+His Honour Judge Andrew Li
+
+
+Background of Plaintiffs: 
+There is no information provided in the given context about the number of plaintiffs, their gender, age during the accident, age during the trial or assessment of damages, or their occupation before the accident.
+
+
+Background facts of case: 
+- The plaintiff claims that he asked the defendant to issue a warning notice to the occupants of the building before he started his repair work.
+- The plaintiff turned off the power supply on the ground floor before going to fix the fuse box on the 5th floor.
+- The defendant's witness claims that he did not know about the accident until the plaintiff issued the proceedings.
+- The defendant's witness also claims that there was no mention of the accident in the minutes of the committee meeting that took place on the same day.
+- The plaintiff's evidence is considered unsatisfactory and not convincing by the court.
+- The court finds that the plaintiff may be telling the truth in some parts of the case, but not in others.
+- The court gives extra allowance for the plaintiff's lack of education and articulation in court.
+
+
+Legal Issues: 
+- The legal issues discussed include negligence, breach of statutory duty, and the application of the doctrine of res ipsa loquitur.
+- The judge and the lawyers discussed the liability of the plaintiff and the defendant, specifically in relation to the breach of statutory duty under the Occupier's Liability Ordinance and the Employment Ordinance.
+- The judge also mentioned the plaintiff's counsel referring to sections of the Building Management Ordinance to argue that the defendant owed a duty to enforce obligations contained in the Deed of Mutual Covenant.
+- The judge ruled that the doctrine of res ipsa loquitur did not apply in this case.
+- The judge did not consider the sections of the Building Management Ordinance as they were not pleaded in the statement of claim.
+- The judge mentioned that the plaintiff's claim was ridden with problems and his chance of success on liability was uncertain.
+- The judge ruled that it was unreasonable for the plaintiff to persist in pursuing the matter in the District Court when it should have been dealt with in the Small Claims Tribunal.
+- The judge stated that costs will normally follow the event, but in this case, the damages awarded to the plaintiff were within the jurisdiction of the Small Claims Tribunal.
+- The judge referred to a previous case where it was stated that claims in tort of not more than $50,000 should be heard in the Small Claims Tribunal.
+- The judge ruled that the relevant consideration is whether, at the commencement of the action, it was reasonable to say that the plaintiff would recover more than $50,000.
+- The judge mentioned that the plaintiff's injury was extremely minor and could not have affected his earning, and therefore, he could not have recovered more than $50,000.
+
+
+Rulings: 
+The judge made several rulings in this case. First, the judge ruled that costs would normally follow the event, meaning that the party who succeeds in their claim would typically be awarded costs. However, in this case, the damages awarded to the plaintiff were within the jurisdiction of the Small Claims Tribunal (SCT). 
+
+The judge also referred to a previous case where it was stated that the only relevant consideration for determining whether the action should have been commenced in the District Court was whether, at the commencement of the action, it was reasonable to believe that the plaintiff would recover more than $50,000. In this case, the plaintiff's injury was minor and would not have affected his earning capacity, so it was unlikely that he would have recovered more than $50,000. 
+
+Based on these considerations, the judge ruled that costs would be awarded on the basis as those allowed in the SCT, where no legal representation would be permitted and only reasonable expenses incurred by the litigants would be allowed. The judge made an order nisi that the defendant should pay the plaintiff's costs to be assessed in a manner similar to those allowed in the SCT, and the order would become absolute unless the parties applied to vary it within 14 days.
+
+
+injury:
+There is no mention of any specific injuries suffered by the plaintiff in the given context information.
+
+
+Loss of amenities: 
+There is no mention of any loss of amenities, such as the ability to engage in social activities, sports, or hobbies, for the plaintiff in the given context.
+
+
+Medical evidence: 
+There is no specific mention of medical evidence for each plaintiff in the given context information.
+
+
+Earnings of plaintiff: 
+The context information does not provide any specific information about the income or earning abilities of each plaintiff.
+
+
+Quantum:
+The amount of damages or compensation to be awarded to each plaintiff is as follows:
+
+Plaintiff 1:
+- PSLA (Pain, Suffering, and Loss of Amenity): HK$40,000.00
+- Pre-trial loss of earnings: HK$5,670.00
+- Loss of earning capacity: nil
+- Future loss of earnings & medical expenses: nil
+- Special damages: HK$1,785.50
+Total amount awarded: HK$47,455.50
+
+Plaintiff 2:
+- PSLA (Pain, Suffering, and Loss of Amenity): HK$40,000.00
+- Loss of pre-trial earnings: HK$5,670.00
+Total amount awarded: HK$45,670.00
+
+
+Issues related to quantum: 
+The court made the following rulings and provided reasons for each of the heads of damages:
+
+1. PSLA (Pain, Suffering, and Loss of Amenity): The court awarded HK$40,000 as damages for PSLA. The specific reasons for this award were not mentioned in the given context.
+
+2. Pre-trial loss of earnings: The court awarded HK$5,670 as damages for pre-trial loss of earnings. The specific reasons for this award were not mentioned in the given context.
+
+3. Loss of earning capacity: The court did not award any damages for loss of earning capacity. The specific reasons for this decision were not mentioned in the given context.
+
+4. Future loss of earnings & medical expenses: The court did not award any damages for future loss of earnings and medical expenses. The specific reasons for this decision were not mentioned in the given context.
+
+5. Special damages: The court awarded HK$1,785.50 as special damages. The specific reasons for this award were not mentioned in the given context.
+
+
+Costs: 
+The court ruled that costs would normally follow the event. However, in this case, the plaintiff's claim was within the jurisdiction of the Small Claims Tribunal (SCT). The court found it unreasonable for the plaintiff to persist in pursuing the matter in the District Court when it should have been dealt with in the SCT. Therefore, the court awarded costs to be assessed in a manner similar to those allowed in the SCT. The defendant was ordered to pay the plaintiff's costs, which would be assessed in the same manner as the costs allowed in the SCT.
+
+
+Legal representation: 
+The legal representative for the plaintiff is Mr Tim Wong, instructed by Alan Ho & Co. The legal representative for the defendant is Mr Jackson Poon, instructed by Wong, Fung & Co.
+
+
+Accident circumstances: 
+The accident involved an electrical shock and burns to the plaintiff's neck. The plaintiff was working to replace a fuse when the electricity supply was suddenly reconnected without notice, causing the injury.
