@@ -1,4 +1,5 @@
 import os
+import json
 import dotenv
 import openai
 import pinecone
@@ -60,8 +61,11 @@ def build_dict_of_case_index(list_of_case_numbers, docs):
             dimension=1536,
             metric='cosine'
         )
+        print("Pinecone canvas does not exist. Just created and connected.")
     pinecone_index = pinecone.Index(index_name)
     print("Pinecone canvas connected.")
+
+    print(pinecone_index.fetch(ids=['DCPI003618_2019']))
 
     service_context = build_context("gpt-3.5-turbo")
 
@@ -73,7 +77,7 @@ def build_dict_of_case_index(list_of_case_numbers, docs):
         )
         #4. create storage context to tell that the real vector store (later created in 5) that this Pinecone store will be stored in 3
         storage_context = StorageContext.from_defaults(vector_store=vector_store)
-        #5. create the real vector store (GPTVectorStore) and store in 4
+        #5. create the real vector index (GPTVectorStoreIndex) and store in 4
         case_indicies[case_number] = GPTVectorStoreIndex.from_documents(
             docs[case_number],
             storage_context=storage_context,
@@ -83,12 +87,82 @@ def build_dict_of_case_index(list_of_case_numbers, docs):
     print("Indexing complete.")
     return case_indicies
 
+def test_pinecone_metadata():
+    pinecone.init(
+        api_key = os.getenv("PINECONE_API_KEY"),
+        environment = os.getenv("PINECONE_ENVIRONMENT")
+    )
+
+    index_name = "cases-index"
+    if index_name not in pinecone.list_indexes():
+        pinecone.create_index(
+            index_name,
+            dimension=1536,
+            metric='cosine'
+        )
+        print("Pinecone canvas does not exist. Just created and connected.")
+    pinecone_index = pinecone.Index(index_name)
+    print("Pinecone canvas connected.")
+
+    vector_store = PineconeVectorStore(pinecone_index=pinecone_index)
+    
+    nodes = vector_store.query(
+        vector = [0]*1536,
+        filter = {
+            "file_name": "DCPI003618_2019.pdf"
+        },
+        top_k=10,
+        include_metadata = True
+    )
+    
+    for node in nodes.matches:
+        deserialized_node_content = json.loads(node.metadata['_node_content'])
+        file_name = deserialized_node_content['metadata']['file_name']
+        print(file_name)
+    
+
+test_pinecone_metadata()
 
 def query_case(search_result, query):
-    list_of_case_numbers = create_list_of_case_numbers()
-    docs = build_docs(list_of_case_numbers)
-    dict_of_case_indicies = build_dict_of_case_index(list_of_case_numbers, docs)
+    # list_of_case_numbers = create_list_of_case_numbers()
+    # docs = build_docs(list_of_case_numbers)
+    # dict_of_case_indicies = build_dict_of_case_index(list_of_case_numbers, docs)
 
+    #Init pincone and connect with canvas
+    pinecone.init(
+        api_key = os.getenv("PINECONE_API_KEY"),
+        environment = os.getenv("PINECONE_ENVIRONMENT")
+    )
+
+    index_name = "cases-index"
+    if index_name not in pinecone.list_indexes():
+        pinecone.create_index(
+            index_name,
+            dimension=1536,
+            metric='cosine'
+        )
+        print("Pinecone canvas does not exist. Just created and connected.")
+    pinecone_index = pinecone.Index(index_name)
+    print("Pinecone canvas connected.")
+
+    #Query and receive nodes
+    nodes = pinecone_index.query(
+        vector = [0]*1536,
+        filter = {
+            "file_name": f"{search_result}.pdf"
+        },
+        top_k=5,
+        include_metadata = True
+    )
+
+    #Just to test if the retrieval is successful and only searches the chosen case
+    for node in nodes.matches:
+        deserialized_node_content = json.loads(node.metadata['_node_content'])
+        file_name = deserialized_node_content['metadata']['file_name']
+        print(file_name)
+
+
+    #Synthesize answers
     PROMPT_TEMPLATE = (
         "Here are the context information:"
         "\n------------------------------\n"
@@ -98,11 +172,12 @@ def query_case(search_result, query):
     )
 
     QA_PROMPT = QuestionAnswerPrompt(PROMPT_TEMPLATE)
-    query_engine = dict_of_case_indicies[search_result].as_query_engine(text_qa_template=QA_PROMPT)
-    res1 = query_engine.query(query)
+    # query_engine = dict_of_case_indicies[search_result].as_query_engine(text_qa_template=QA_PROMPT)
+    # res1 = query_engine.query(query)
 
-    print(str(res1))
-    # print(res1.get_formatted_sources())
+
+
+    
 
     
 
