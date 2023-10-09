@@ -10,11 +10,13 @@ from llama_index import (
     PineconeReader,
     GPTVectorStoreIndex,
     QuestionAnswerPrompt,
-    LLMPredictor
+    LLMPredictor,
+    VectorStoreIndex
 )
 from llama_index.vector_stores import PineconeVectorStore
 from llama_index.storage.storage_context import StorageContext
 from langchain.chat_models import ChatOpenAI
+from llama_index.vector_stores.types import ExactMatchFilter, MetadataFilters
 
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -33,7 +35,14 @@ def build_docs(list_of_case_numbers):
     docs = {}
     for case_number in list_of_case_numbers:
         docs[case_number] = SimpleDirectoryReader(input_files=[f"./data/{case_number}.pdf"]).load_data()
+        for doc in docs[case_number]:
+            doc.metadata = {"content_type":"case_itself"}
+            doc.metadata["case_number"] = case_number
+    # print("Here are the number of LODOs: ",len(docs))
+    # first_key, first_value = next(iter(docs.items()))
+    # print("Here is the metadat of the first DO of the first LODO: ", docs[first_key][0].metadata)
     return docs
+
 
 def build_context(model_name):
     llm_predictor = LLMPredictor(
@@ -46,8 +55,6 @@ def build_dict_of_case_index(list_of_case_numbers, docs):
     case_indicies = {}
     
     #1. init pinecone
-    # print("hahah", os.getenv("PINECONE_API_KEY"))
-
     pinecone.init(
         api_key = os.getenv("PINECONE_API_KEY"),
         environment = os.getenv("PINECONE_ENVIRONMENT")
@@ -63,9 +70,7 @@ def build_dict_of_case_index(list_of_case_numbers, docs):
         )
         print("Pinecone canvas does not exist. Just created and connected.")
     pinecone_index = pinecone.Index(index_name)
-    print("Pinecone canvas connected.")
-
-    print(pinecone_index.fetch(ids=['DCPI003618_2019']))
+    print("Pinecone canvas already exists. Now we're connected.")
 
     service_context = build_context("gpt-3.5-turbo")
 
@@ -83,9 +88,10 @@ def build_dict_of_case_index(list_of_case_numbers, docs):
             storage_context=storage_context,
             service_context=service_context
         )
-        case_indicies[case_number].index_struct.index_id = case_number
+        # case_indicies[case_number].index_struct.index_id = case_number
     print("Indexing complete.")
     return case_indicies
+
 
 def test_pinecone_metadata():
     pinecone.init(
@@ -104,9 +110,8 @@ def test_pinecone_metadata():
     pinecone_index = pinecone.Index(index_name)
     print("Pinecone canvas connected.")
 
-    vector_store = PineconeVectorStore(pinecone_index=pinecone_index)
     
-    nodes = vector_store.query(
+    nodes = pinecone_index.query(
         vector = [0]*1536,
         filter = {
             "file_name": "DCPI003618_2019.pdf"
@@ -121,12 +126,7 @@ def test_pinecone_metadata():
         print(file_name)
     
 
-test_pinecone_metadata()
-
-def query_case(search_result, query):
-    # list_of_case_numbers = create_list_of_case_numbers()
-    # docs = build_docs(list_of_case_numbers)
-    # dict_of_case_indicies = build_dict_of_case_index(list_of_case_numbers, docs)
+def query_case(dedup_search_results:list, query):
 
     #Init pincone and connect with canvas
     pinecone.init(
@@ -143,45 +143,63 @@ def query_case(search_result, query):
         )
         print("Pinecone canvas does not exist. Just created and connected.")
     pinecone_index = pinecone.Index(index_name)
-    print("Pinecone canvas connected.")
+    print("Pinecone canvas already exists. Now we're connected.")
 
-    #Query and receive nodes
-    nodes = pinecone_index.query(
-        vector = [0]*1536,
-        filter = {
-            "file_name": f"{search_result}.pdf"
-        },
-        top_k=5,
-        include_metadata = True
+    #Construct vector store from Pinecone
+    vector_store = PineconeVectorStore(pinecone_index=pinecone_index)
+
+    #Create a VectorStoreIndex from the existing vector store in Pinecone and then query it
+    vector_index = VectorStoreIndex.from_vector_store(vector_store=vector_store)
+
+    #For each case, query with metadata and QAPrompt to return an answer
+    final_answers = {}
+    for case_num in dedup_search_results:
+
+        #Define filters
+        filters = MetadataFilters(filters=[
+        ExactMatchFilter(
+            key = "content_type",
+            value = "case_summary"
+        ),
+        ExactMatchFilter(
+            key = "case_number",
+            value = case_num
+        )]
     )
-
-    #Just to test if the retrieval is successful and only searches the chosen case
-    for node in nodes.matches:
-        deserialized_node_content = json.loads(node.metadata['_node_content'])
-        file_name = deserialized_node_content['metadata']['file_name']
-        print(file_name)
-
-
-    #Synthesize answers
-    PROMPT_TEMPLATE = (
+        
+        #Define QAPrompt
+        PROMPT_TEMPLATE = (
         "Here are the context information:"
         "\n------------------------------\n"
         "{context_str}"
         "\n------------------------------\n"
-        "You are a AI legal assistant for lawyers in Hong Kong. Answer the follwing question in three parts. First, explained what happened in the case for reference in the context. Second, explain how this case is relevant to the following question:{query_str}. Lastly, answer this question: :{query_str} \n"
-    )
+        "You are a AI legal assistant for lawyers in Hong Kong. Answer the follwing question in two parts. Break down these two parts with sub-headings. First, explained what happened in the case for reference in the context. Second, explain how this case is relevant to the following siutation or question: {query_str}. \n"
+        )
 
-    QA_PROMPT = QuestionAnswerPrompt(PROMPT_TEMPLATE)
-    # query_engine = dict_of_case_indicies[search_result].as_query_engine(text_qa_template=QA_PROMPT)
-    # res1 = query_engine.query(query)
+        QA_PROMPT = QuestionAnswerPrompt(PROMPT_TEMPLATE)
 
+        #Define query_engine
+        query_engine = vector_index.as_query_engine(
+            similarity_top_k = 3,
+            vector_store_query_mode = "default",
+            filters = filters,
+            text_qa_template=QA_PROMPT
+        )
 
-
+        #Peform query and return answers
+        response = query_engine.query(query)
+        print(response)
+        print("\n")
+        final_answers[str(case_num)] = str(response)
     
-
+    print(f"6. There are {len(final_answers)} answers.")
     
+    return final_answers
 
 
+# list_of_case_numbers = create_list_of_case_numbers()
+# docs = build_docs(list_of_case_numbers)
+# build_dict_of_case_index(list_of_case_numbers, docs)
 
 
     

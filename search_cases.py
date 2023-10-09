@@ -18,6 +18,7 @@ from llama_index.storage.storage_context import StorageContext
 from llama_index.vector_stores import PineconeVectorStore
 from langchain.chat_models import ChatOpenAI
 from llama_index.vector_stores.types import ExactMatchFilter, MetadataFilters
+from case_query import query_case
 
 
 load_dotenv()
@@ -26,17 +27,17 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))
 
-# st.header("Smart Search Engine for Legal Cases.")
+st.header("Smart Search Engine for Legal Cases.")
 
-# if "messages" not in st.session_state.keys():
-#     st.session_state.messages = [
-#         {
-#             "role": "assistant", 
-#          "content": "Describe your case and we will find you relevant cases."
-#          }
-#     ]
+if "messages" not in st.session_state.keys():
+    st.session_state.messages = [
+        {
+            "role": "assistant", 
+         "content": "Describe your case and we will find you relevant cases."
+         }
+    ]
 
-# @st.cache_resource(show_spinner=False)
+@st.cache_resource(show_spinner=False)
 
 def create_list_of_case_numbers():
     list_of_case_numbers = []
@@ -164,21 +165,19 @@ def query_search_engine(query):
     print("Pinecone index has already been created and now connected.")
 
     #construct a vector store from Pinecone
-    vector_store = PineconeVectorStore(pinecone_index=pinecone_index)
+    vector_store = PineconeVectorStore(pinecone_index=pinecone_index,
+        metadata_filters={"content_type": "case_summary"})
     
     #create a VectorStoreIndex from the existing vector store in Pinecone and then query it
-    vector_index = VectorStoreIndex.from_vector_store(vector_store=vector_store)
+    vector_index = VectorStoreIndex.from_vector_store(
+        vector_store=vector_store,
+        # metadata_filters={"content_type": "case_summary"}
+        )
 
-    #create a retriever from the vector_index
-    retriever = vector_index.as_retriever(
-        similarity_top_k=100
-    )
-    #retrieve nodes
-    nodes = retriever.retrieve(query)
-    for node in nodes:
-        print("number of nodes: ",len(nodes))
-        print(node.metadata)
-    print("\n\n")
+    # #create a retriever from the vector_index
+    # retriever = vector_index.as_retriever(
+    #     similarity_top_k=1000
+    # )
 
     #define metadata filters and filter the nodes
     filters = MetadataFilters(filters=[
@@ -188,71 +187,86 @@ def query_search_engine(query):
         )]
     )
 
-    filtered_nodes = []
+    retriever = VectorIndexRetriever(
+        index = vector_index,
+        similarity_top_k=10,
+        vector_store_query_mode="default",
+        filters=filters
+    )
 
+    # #retrieve nodes
+    nodes = retriever.retrieve(query)
+    print("1. Number of nodes retrieved: ", len(nodes))
+    
+    #check how many nodes are unique
+    all_node_text = []
     for node in nodes:
-        matches = True
-        for f in filters.filters:
-            if f.key not in node.metadata:
-                matches = False
-                continue
-            if f.value != node.metadata[f.key]:
-                matches = False
-                continue
-        if matches:
-            filtered_nodes.append(node)
-    for filtered_node in filtered_nodes:
-        print("number of nodes: ",len(filtered_nodes))
-        print(filtered_node.metadata)
-    print("\n\n")
+        node_text = node.text.replace("\n", "")
+        if node_text not in all_node_text:
+            all_node_text.append(node_text)
+    
+    print("2. number of nodes: ",len(nodes))
+    print("3. number of unique nodes: ",len(all_node_text))
+
+    #######HACKY WAY#######
+    # #define metadata filters and filter the nodes
+    # filters = MetadataFilters(filters=[
+    #     ExactMatchFilter(
+    #         key="content_type",
+    #         value="case_summary"
+    #     )]
+    # )
+
+    # filtered_nodes = []
+
+    # for node in nodes:
+    #     matches = True
+    #     for f in filters.filters:
+    #         if f.key not in node.metadata:
+    #             matches = False
+    #             continue
+    #         if f.value != node.metadata[f.key]:
+    #             matches = False
+    #             continue
+    #     if matches:
+    #         filtered_nodes.append(node)
+    # for filtered_node in filtered_nodes:
+    #     print(filtered_node.metadata)
+    # print("number of nodes: ",len(filtered_nodes))
+    # print("\n\n")
+    #######HACKY WAY#######
     
     #extract the case number from the filtered nodes and then de-duplicate them
     raw_search_results = []
     dedup_search_results = []
 
-    for filtered_node in filtered_nodes:
-        raw_search_results.append(filtered_node.metadata['case_number'])
-    print("RSR: ",raw_search_results)
-
+    for node in nodes:
+        raw_search_results.append(node.metadata['case_number'])
+    print("4. RSR: ",raw_search_results)
     [dedup_search_results.append(raw_search_result) for raw_search_result in raw_search_results if raw_search_result not in dedup_search_results]
-    print("DRSR: ",dedup_search_results)
+    print("5. DRSR: ",dedup_search_results)
+    print("\n")
+    print(f"hahaah! There are {len(dedup_search_results)} unique search results!")
+    return dedup_search_results
     
-query_search_engine("My client slips and falls in a shopping mall. Fine me relevant cases.")
+# query = "my client slips and falls in a shopping mall."
+# dedup_search_results = query_search_engine(query)
+# final_answers = query_case(dedup_search_results, query)
+# print(f"7. FINAL: {final_answers}")
 
 
-    # search_results = []
-    # retrieved_cases = []
-    # for node in nodes:
-    #     retrieved_cases.append(node.metadata['case_number'])
+if prompt := st.chat_input("Your question"):
+    st.session_state.messages.append({"role": "user", "content": prompt})
 
-    # print("Here are the retrieved nodes: ", retrieved_cases)
-    # [search_results.append(case_num) for case_num in retrieved_cases if case_num not in search_results]
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.write(message["content"])
 
-    # print("Here are the final results: ",search_results)
-    # return search_results
-    
-# if prompt := st.chat_input("Your question"):
-#     st.session_state.messages.append({"role": "user", "content": prompt})
-
-# for message in st.session_state.messages:
-#     with st.chat_message(message["role"]):
-#         st.write(message["content"])
-
-# if st.session_state.messages[-1]["role"] != "assistant":
-#     with st.chat_message("assistant"):
-#         with st.spinner("Thinking..."):
-#             search_results = query_search_engine(prompt)
-
-#             responses = [query_case(case_number, prompt) for case_number in search_results]
-
-#             for response in responses:
-#                 st.write(response)
-
-#             message = {"role": "assistant", "content": responses}
-#             st.session_state.messages.append(message)
-#             # for search_result in search_results:
-#             #     final_answer = query_case(search_result, prompt)
-#             #     # st.markdown("- " + search_result)
-#             #     st.write(final_answer)
-#             # message = {"role": "assistant", "content": search_results}
-#             # st.session_state.messages.append(message)
+if st.session_state.messages[-1]["role"] != "assistant":
+    with st.chat_message("assistant"):
+        with st.spinner("Thinking..."):
+            dedup_search_results = query_search_engine(prompt)
+            final_answers = query_case(dedup_search_results, prompt)
+            st.write(final_answers)
+            message = {"role": "assistant", "content": final_answers}
+            st.session_state.messages.append(message)
