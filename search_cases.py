@@ -1,4 +1,5 @@
 import dotenv
+import time
 import os
 import streamlit as st
 import logging
@@ -11,14 +12,15 @@ from llama_index import (
     GPTVectorStoreIndex,
     LLMPredictor,
     ServiceContext,
-    VectorStoreIndex
+    VectorStoreIndex,
+    QuestionAnswerPrompt
 )
 from llama_index.retrievers import VectorIndexRetriever
 from llama_index.storage.storage_context import StorageContext
 from llama_index.vector_stores import PineconeVectorStore
 from langchain.chat_models import ChatOpenAI
 from llama_index.vector_stores.types import ExactMatchFilter, MetadataFilters
-from case_query import query_case
+# from case_query import query_case
 
 
 load_dotenv()
@@ -105,7 +107,6 @@ def test_index(docs):
     # print(filtered_nodes)
 
 
-
 def build_context(model_name):
     llm_predictor = LLMPredictor(
         llm = ChatOpenAI(temperature=0, model_name=model_name)
@@ -148,6 +149,8 @@ def build_summaries_index(docs):
 
 def query_search_engine(query):
 
+    print(f"1. Start query_search_engine. Time: {time.ctime(time.time())}")
+
     pinecone.init(
         api_key=os.getenv("PINECONE_API_KEY"),
         environment=os.getenv("PINECONE_ENVIRONMENT")
@@ -174,6 +177,8 @@ def query_search_engine(query):
         # metadata_filters={"content_type": "case_summary"}
         )
 
+    vector_index_done_time = time.time()
+    print(f"2. Pinecone conntected and Vector Index Done. Time: {time.ctime(time.time())}")
     # #create a retriever from the vector_index
     # retriever = vector_index.as_retriever(
     #     similarity_top_k=1000
@@ -196,7 +201,7 @@ def query_search_engine(query):
 
     # #retrieve nodes
     nodes = retriever.retrieve(query)
-    print("1. Number of nodes retrieved: ", len(nodes))
+    print("a. Number of nodes retrieved: ", len(nodes))
     
     #check how many nodes are unique
     all_node_text = []
@@ -205,8 +210,8 @@ def query_search_engine(query):
         if node_text not in all_node_text:
             all_node_text.append(node_text)
     
-    print("2. number of nodes: ",len(nodes))
-    print("3. number of unique nodes: ",len(all_node_text))
+    print("b. number of nodes: ",len(nodes))
+    print("c. number of unique nodes: ",len(all_node_text))
 
     #######HACKY WAY#######
     # #define metadata filters and filter the nodes
@@ -242,31 +247,180 @@ def query_search_engine(query):
 
     for node in nodes:
         raw_search_results.append(node.metadata['case_number'])
-    print("4. RSR: ",raw_search_results)
+    print("d. RSR: ",raw_search_results)
     [dedup_search_results.append(raw_search_result) for raw_search_result in raw_search_results if raw_search_result not in dedup_search_results]
-    print("5. DRSR: ",dedup_search_results)
-    print("\n")
+    print("e. DRSR: ",dedup_search_results)
     print(f"hahaah! There are {len(dedup_search_results)} unique search results!")
+    print(f"3. Retrieval done and query_seach_engine done. Time: {time.ctime(time.time())}")
     return dedup_search_results
     
+
+def query_case(case_num, query):
+    
+    print(f"4. Start query_search_engine. Time: {time.ctime(time.time())}")
+
+    #Init pincone and connect with canvas
+    pinecone.init(
+        api_key = os.getenv("PINECONE_API_KEY"),
+        environment = os.getenv("PINECONE_ENVIRONMENT")
+    )
+
+    index_name = "cases-index"
+    if index_name not in pinecone.list_indexes():
+        pinecone.create_index(
+            index_name,
+            dimension=1536,
+            metric='cosine'
+        )
+        print("Pinecone canvas does not exist. Just created and connected.")
+    pinecone_index = pinecone.Index(index_name)
+    print("Pinecone canvas already exists. Now we're connected.")
+
+    #Construct vector store from Pinecone
+    vector_store = PineconeVectorStore(pinecone_index=pinecone_index)
+
+    #Create a VectorStoreIndex from the existing vector store in Pinecone and then query it
+    vector_index = VectorStoreIndex.from_vector_store(vector_store=vector_store)
+
+    vector_index_done_time = time.time()
+    print(f"5. Second vector index done. Time: {time.ctime(time.time())}")
+
+    #Query with metadata and QAPrompt to return an answer
+
+    #Define filters
+    filters = MetadataFilters(filters=[
+        ExactMatchFilter(
+            key = "content_type",
+            value = "case_itself"
+        ),
+        ExactMatchFilter(
+            key = "case_number",
+            value = case_num
+        )]
+    )
+        
+    #Define QA_Prompt
+    PROMPT_TEMPLATE = (
+        "Here are the context information:"
+        "\n------------------------------\n"
+        "{context_str}"
+        "\n------------------------------\n"
+        "You are a AI legal assistant for lawyers in Hong Kong. Answer the follwing question in two parts. Break down these two parts with sub-headings. First, explained what happened in the case for reference in the context. Second, explain how this case is relevant to the following siutation or question: {query_str}. \n"
+    )
+
+    QA_PROMPT = QuestionAnswerPrompt(PROMPT_TEMPLATE)
+
+    #Define query_engine
+    query_engine = vector_index.as_query_engine(
+        similarity_top_k = 3,
+        vector_store_query_mode = "default",
+        filters = filters,
+        text_qa_template=QA_PROMPT,
+        streaming = True    
+    )
+
+    print(f"6. Case Query Engine done. Time: {time.ctime(time.time())}")
+
+    #Peform query and return answer
+    response = query_engine.query(query)
+    # response.print_response_stream()
+    # print(response)
+    print(f"7. A response is generated. Time: {time.ctime(time.time())}")
+    
+    return response
+
+
+def test_metadata(query):
+
+    pinecone.init(
+        api_key=os.getenv("PINECONE_API_KEY"),
+        environment=os.getenv("PINECONE_ENVIRONMENT")
+    )
+
+    index_name = "cases-index"
+    if index_name not in pinecone.list_indexes():
+        pinecone.create_index(
+            index_name,
+            dimension=1536,
+            metric="cosine"
+        )
+        print("Pinecone index not exist. Need to create one.")
+    pinecone_index = pinecone.Index(index_name)
+    print("Pinecone index has already been created and now connected.")
+
+    #construct a vector store from Pinecone
+    vector_store = PineconeVectorStore(pinecone_index=pinecone_index,
+        # metadata_filters={"content_type": "case_summary"}
+        )
+    
+    #create a VectorStoreIndex from the existing vector store in Pinecone and then query it
+    vector_index = VectorStoreIndex.from_vector_store(
+        vector_store=vector_store,
+        # metadata_filters={"content_type": "case_summary"}
+        )
+    
+    # define metadata filters and the filter
+    filters = MetadataFilters(filters=[
+        ExactMatchFilter(
+            key="content_type",
+            value="case_itself"
+        )]
+    )
+
+    retriever = VectorIndexRetriever(
+        index = vector_index,
+        similarity_top_k=10000,
+        vector_store_query_mode="default",
+        filters=filters
+    )
+
+    # retrieve nodes
+    nodes = retriever.retrieve(query)
+    print("a. Number of nodes retrieved: ", len(nodes))
+    
+    #check how many nodes are unique
+    all_node_text = []
+    for node in nodes:
+        node_text = node.text.replace("\n", "")
+        if node_text not in all_node_text:
+            all_node_text.append(node_text)
+    
+    print("b. number of nodes: ",len(nodes))
+    print("c. number of unique nodes: ",len(all_node_text))
+
+    raw_search_results = []
+    dedup_search_results = []
+
+    for node in nodes:
+        raw_search_results.append(node.metadata['case_number'])
+    print(f"d. number of case numbers: {len(raw_search_results)}\n --",raw_search_results)
+    [dedup_search_results.append(raw_search_result) for raw_search_result in raw_search_results if raw_search_result not in dedup_search_results]
+    print(f"e. number of unique case numbers: {len(dedup_search_results)}\n --",dedup_search_results)
+    return dedup_search_results
+    
+query = "my client slips and falls in a shopping mall."
+test_metadata(query)
+
 # query = "my client slips and falls in a shopping mall."
 # dedup_search_results = query_search_engine(query)
-# final_answers = query_case(dedup_search_results, query)
-# print(f"7. FINAL: {final_answers}")
+# answer = query_case(dedup_search_results[0],query)
+# answer.print_response_stream()
+# print("\n")
+# print(f"8. Everything Done. Time: {time.ctime(time.time())}")
 
 
-if prompt := st.chat_input("Your question"):
-    st.session_state.messages.append({"role": "user", "content": prompt})
+# if prompt := st.chat_input("Your question"):
+#     st.session_state.messages.append({"role": "user", "content": prompt})
 
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.write(message["content"])
+# for message in st.session_state.messages:
+#     with st.chat_message(message["role"]):
+#         st.write(message["content"])
 
-if st.session_state.messages[-1]["role"] != "assistant":
-    with st.chat_message("assistant"):
-        with st.spinner("Thinking..."):
-            dedup_search_results = query_search_engine(prompt)
-            final_answers = query_case(dedup_search_results, prompt)
-            st.write(final_answers)
-            message = {"role": "assistant", "content": final_answers}
-            st.session_state.messages.append(message)
+# if st.session_state.messages[-1]["role"] != "assistant":
+#     with st.chat_message("assistant"):
+#         with st.spinner("Thinking..."):
+#             dedup_search_results = query_search_engine(prompt)
+#             final_answers = query_case(dedup_search_results, prompt)
+#             st.write(final_answers)
+#             message = {"role": "assistant", "content": final_answers}
+#             st.session_state.messages.append(message)

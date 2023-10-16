@@ -1,49 +1,61 @@
 Date of Hearing: 
-The date of the hearing is 5th September 2001.
+The Date of Hearing is 5 September 2001.
 
 
 Date of Judgement: 
-The date of judgment is 5.9.2001.
+The date of Judgment is 5 September 2001.
 
 
 Plaintiff and Defendant: 
-The names of the plaintiff and defendant are not provided in the given context information.
+The plaintiff in this case is Nicola Sian Griffiths. The defendant is Lettuce Chat Limited trading as Zip.
 
 
 Judge: 
-Faye McCarthy
+H H Judge Li
 
 
 Background of Plaintiffs: 
-There is no information provided in the given context about the number of plaintiffs involved in the case, their gender, age during the accident, age during the trial or assessment of damages, or their occupation before the accident.
+Based on the given context, there is only one plaintiff mentioned in the case. The plaintiff's name is Nicola Sian Griffiths. The context does not provide information about the plaintiff's gender, age during the accident, age during the trial or assessment of damages, or occupation before the accident.
 
 
 Background facts of case: 
-- The defendant has gone into voluntary liquidation on 31 July of the current year.
-- The defendant is heavily in debt, making it unlikely for the plaintiff to receive satisfaction even if they win the case.
-- The defendant was represented at the beginning but could no longer make representation at the time of the trial due to lack of instructions.
-- The case has become unopposed, with only the plaintiff's side of the story and claims for damages.
-- The court is in a difficult situation as it should not be doing its own research and normally does not enter into the arena.
-- The plaintiff received injuries and the doctor's description of the injuries and pain and suffering is considered true and accurate.
-- There is doubt as to whether the accident occurred on premises occupied by the defendant and whether the defendant can be held responsible for that area.
-- There might be a case of improper initial treatment that contributed to the longer healing period of the plaintiff's wound, potentially shifting some liability to someone else.
-- The plaintiff claimed to have fallen because it was dark, but there might be an element of contributory negligence.
-- The judge accepts the plaintiff's case on the face of it, but acknowledges that there might be legal points to query the position of liability.
+- The plaintiff, Nicola Sian Griffiths, claims to have injured herself on 15 July at a restaurant and bar called Zip in Hong Kong.
+- She slipped and injured her left foot while entering the outdoor seating area of the premises.
+- According to medical opinion, she had a fractured fifth metatarsal bone but was practically completely cured by 7 September.
+- The defendant, Lettuce Chat Limited trading as Zip, has gone into voluntary liquidation on 31 July and is heavily in debt.
+- The defendant's former solicitors could no longer represent them at the time of trial due to lack of instructions.
+- The defendant did not oppose the case, making it an unopposed action.
+- The court has doubts about whether the accident occurred on premises occupied by the defendant and whether the defendant can be held responsible for that area.
+- There might be a case of treatment not being properly carried out, which could have contributed to the longer healing period and pain and suffering.
+- The plaintiff claimed that she fell because it was dark, but there might be an element of contributory negligence.
+- The court accepts the plaintiff's case on liability but has reservations about the amount of damages claimed.
+- The plaintiff initially asked for $30,000 in damages, but later requested the claim to be amended to damages to be awarded as the court sees fit.
+- The court allows the general damages to be $70,000 based on the plaintiff's request, as there is no basis to determine the appropriate amount.
+- The court allows the taxi fares ($3,000) and medical bills ($15,276) as special damages without dispute.
+- The court also allows other special damages, such as cancelled tickets, amendment charges, gym membership fee, and concert ticket, as they are claimed to be reasonably foreseeable by the plaintiff's lawyer.
+- The plaintiff is entitled to costs of the action, to be taxed if not agreed.
 
 
 Legal Issues: 
-- The legal issues discussed include the defendant's voluntary liquidation, lack of representation for the defendant, unopposed action, the plaintiff's credibility, the defendant's responsibility for the accident location, potential contributory negligence, and the possibility of another party being liable for the plaintiff's injuries.
-- The judge expresses doubt about the defendant's ability to satisfy any judgment due to their heavy debt.
-- The judge acknowledges that the lack of opposition in the case raises problems as there is only the plaintiff's side of the story.
-- The judge notes that the court should not be doing its own research and should not enter into the arena.
-- The judge expresses doubt about the accident location being the defendant's premises but acknowledges the lack of solid evidence.
-- The judge raises the possibility that part of the plaintiff's pain and suffering may not be directly caused by the accident and injury, suggesting that another party may be partially liable.
-- The judge mentions the potential element of contributory negligence but notes that it is not in the pleadings and is left unaddressed due to the lack of opposition.
-- Despite the mentioned legal issues, the judge accepts the plaintiff's case on its face and enters judgment on liability against the defendant.
+- The legal issues discussed include liability for the plaintiff's injuries, the amount of general damages, the validity of special damages, and the defendant's voluntary liquidation.
+- The judge expresses doubt about whether the defendant can be held responsible for the area where the accident occurred.
+- The judge also raises the possibility that the plaintiff's prolonged healing may be due to improper treatment, which could shift some liability to someone else.
+- The judge notes that there is no evidence of contributory negligence on the part of the plaintiff.
+- The plaintiff's lawyer argues for an amendment to the statement of damages, requesting damages to be awarded as the court sees fit.
+- The plaintiff's lawyer cites several cases as precedent for the amount of general damages sought.
+- The judge states that the cited cases are not helpful and that they have no basis to determine the appropriate amount of general damages.
+- The judge allows the general damages to be awarded as requested by the plaintiff's lawyer.
+- The judge finds no dispute with the taxi fares and medical bills and allows them as special damages.
+- The judge initially questions the validity of other special damages, such as cancelled tickets and wasted gym membership, but ultimately allows them based on the plaintiff's argument and lack of opposition from the defendant.
+- The judge notes that the defendant's voluntary liquidation may make it difficult for the plaintiff to collect any judgment.
+- The judge states that the case becomes like an unopposed action due to the lack of representation for the defendant.
+- The judge acknowledges that they should not be doing their own research and should not enter into the arena.
+- The judge expresses doubt about the accuracy of the plaintiff's description of where the accident occurred but acknowledges that there is no solid evidence to support or refute it.
+- The judge does not wish to be difficult and ultimately enters judgment on liability against the defendant.
 
 
 Rulings: 
-The judge ruled that the defendant has gone into voluntary liquidation and is heavily in debt, making it unlikely for the plaintiff to receive satisfaction from the defendant. The judge also noted that the case has become unopposed, which could raise problems as there is only the plaintiff's side of the story and no one to argue or scrutinize. The judge expressed doubt about the location of the accident and the defendant's responsibility for that area, but acknowledged the lack of solid evidence. The judge also mentioned the possibility that part of the plaintiff's pain and suffering may not be directly caused by the accident, but rather by improper treatment. The judge considered the element of contributory negligence but stated that it is not in the pleadings. Despite these observations, the judge accepted the plaintiff's case and entered judgment on liability against the defendant. Additionally, the judge allowed certain losses claimed by the plaintiff, such as taxi fares, medical bills, plane ticket, amendment charge, rail tickets, gym membership fee, and concert ticket. The judge also ruled that the plaintiff is entitled to costs of the action.
+The judge ruled that judgment on liability should be entered against the defendant. In terms of damages, the judge allowed the general damages to be awarded as the court sees fit, with a suggested figure of $70,000. The judge also allowed the special damages, including taxi fares and medical bills, as well as other expenses such as plane tickets, amendment charges, and gym membership fees. The judge stated that the plaintiff is entitled to costs of the action, to be taxed if not agreed.
 
 
 injury:
@@ -51,7 +63,7 @@ The context information does not provide any specific details about the injuries
 
 
 Loss of amenities: 
-There is no information provided in the given context regarding any loss of amenities experienced by the plaintiff. Therefore, it cannot be determined if the plaintiff has any loss of amenities such as the ability to engage in social activities, sports, and hobbies.
+There is no information provided in the given context regarding any loss of amenities experienced by the plaintiff.
 
 
 Medical evidence: 
@@ -63,26 +75,37 @@ There is no information provided in the given context about the income or earnin
 
 
 Quantum:
-The context information does not provide the specific amounts of damages or compensation to be awarded to each plaintiff.
+The amount of damages or compensation to be awarded to the plaintiff includes the following:
+
+1. General damages: The plaintiff initially asked for $30,000, but later requested the claim to be amended to damages to be awarded as the court sees fit. The court allowed the claim for general damages and the plaintiff suggested that $70,000 would be an appropriate figure.
+
+2. Special damages: The court allowed the following special damages:
+   - Taxi fares: $3,000
+   - Medical bills: $15,276
+   - Plane ticket to Singapore: $1,938
+   - Amendment charge for the plaintiff's husband's ticket: $934
+   - Cost of rail tickets: £130 sterling
+   - Gym membership fee (pro rata for three months): $299
+   - Concert ticket: $150
+
+The total amount of damages or compensation awarded to the plaintiff would be the sum of the general damages and special damages mentioned above.
 
 
 Issues related to quantum: 
-The court ruled on two heads of damages: general damages and special damages.
+The court ruled on two heads of damages: general damages and special damages. 
 
-For general damages, the court allowed the claim for damages to be awarded as the court sees fit. The plaintiff initially asked for $30,000, but later requested the claim to be amended without specifying a figure. The court mentioned that the plaintiff referred to several cases to support her claim, but the court found them unhelpful as they were different from the present case. Ultimately, the court allowed the claim for general damages in the amount of $70,000, stating that it had no basis to say whether it was right or wrong.
+For general damages, the court allowed the plaintiff's claim for an amount of $70,000. The court mentioned that there were no specific cases cited that were directly applicable to the present case, but since there was no opposition and the plaintiff's counsel argued that $70,000 was appropriate, the court allowed it.
 
-For special damages, the court allowed the claim for taxi fares in the amount of $3,000, as it considered this to be a reliable figure. The court also allowed the claim for medical bills in the amount of $15,276, stating that there could be no dispute about it.
-
-The court did not provide specific reasons or basis for each of the heads of damages, but rather mentioned the amounts that were allowed without further explanation.
+For special damages, the court allowed the following items: taxi fares amounting to $3,000, medical bills of $15,276, plane ticket to Singapore at $1,938, amendment charge for the plaintiff's husband's ticket at $934, cost of rail tickets for £130 sterling, gym membership fee of $299 for three months, and a concert ticket of $150. The court mentioned that there might be some cases where these types of losses would be allowed and others where they would not, but since there was no opposition and the plaintiff's counsel argued that these were reasonably foreseeable, the court allowed them.
 
 
 Costs: 
-The court's ruling on costs is not mentioned in the given context information. Therefore, it is not possible to determine who should bear the costs or which party was rewarded costs based on the provided information.
+The court ruled that the plaintiff is entitled to costs of the action, to be taxed if not agreed. It does not specify which party should bear the costs or if any costs were awarded to either party.
 
 
 Legal representation: 
-The context information does not provide any information about the legal representative or lawyer for the plaintiff or the defendant.
+The legal representative for the plaintiff is Miss A M Van Langenberg of Messrs Oldham, Li & Nie. The legal representative for the defendant is Mr Ian De Witt of Messrs Tanner de Witt.
 
 
 Accident circumstances: 
-The context information does not provide specific details about the accident itself. It mentions that the plaintiff fell and sustained injuries, but it does not provide information about the cause of the fall or any other specific details about the accident.
+The accident involved the plaintiff slipping and injuring her left foot. The accident occurred when she was walking into the outdoor seating area of a restaurant and bar called Zip. The exact cause of the injury is not specified, but it is mentioned that she slipped while entering the outdoor seating area. As a result of the accident, the plaintiff fractured her fifth metatarsal bone.

@@ -3,6 +3,7 @@ import json
 import dotenv
 import openai
 import pinecone
+import time
 from dotenv import load_dotenv
 from llama_index import (
     SimpleDirectoryReader,
@@ -128,6 +129,8 @@ def test_pinecone_metadata():
 
 def query_case(dedup_search_results:list, query):
 
+    print(f"4. Start query_search_engine. Time: {time.ctime(time.time())}")
+
     #Init pincone and connect with canvas
     pinecone.init(
         api_key = os.getenv("PINECONE_API_KEY"),
@@ -150,6 +153,9 @@ def query_case(dedup_search_results:list, query):
 
     #Create a VectorStoreIndex from the existing vector store in Pinecone and then query it
     vector_index = VectorStoreIndex.from_vector_store(vector_store=vector_store)
+
+    vector_index_done_time = time.time()
+    print(f"5. Second vector index done. Time: {time.ctime(time.time())}")
 
     #For each case, query with metadata and QAPrompt to return an answer
     final_answers = {}
@@ -183,16 +189,22 @@ def query_case(dedup_search_results:list, query):
             similarity_top_k = 3,
             vector_store_query_mode = "default",
             filters = filters,
-            text_qa_template=QA_PROMPT
+            text_qa_template=QA_PROMPT,
+            # streaming = True    
         )
 
-        #Peform query and return answers
+        print(f"6a. In a for loop... Query Engine done. Time: {time.ctime(time.time())}")
+        print("\n")
+        #Peform query and return answers3
         response = query_engine.query(query)
+        response.print_response_stream()
         print(response)
+        print("\n")
+        print(f"6b. Still in a for loop... A response is generated. Time: {time.ctime(time.time())}")
         print("\n")
         final_answers[str(case_num)] = str(response)
     
-    print(f"6. There are {len(final_answers)} answers.")
+    print(f"7. Out of the for loop... All answers are created and saved to dict. Time: {time.ctime(time.time())}")
     
     return final_answers
 
