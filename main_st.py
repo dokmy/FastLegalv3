@@ -19,7 +19,7 @@ from llama_index.vector_stores.types import ExactMatchFilter, MetadataFilters
 import streamlit as st
 
 # load_dotenv()
-openai.api_key = st.secrets("OPENAI_API_KEY")
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 def create_list_of_case_numbers(cases_folder_path):
     list_of_case_numbers = []
@@ -56,8 +56,8 @@ def build_context(model_name):
 
 def upsert_docs(docs):
     pinecone.init(
-        api_key=st.secrets("PINECONE_API_KEY"),
-        environment=st.secrets("PINECONE_ENVIRONMENT")
+        api_key=st.secrets["PINECONE_API_KEY"],
+        environment=st.secrets["PINECONE_ENVIRONMENT"]
     )
 
     index_name = "cases-index"
@@ -89,8 +89,8 @@ def upsert_docs(docs):
 def build_search_engine():
 
     pinecone.init(
-        api_key=st.secrets("PINECONE_API_KEY"),
-        environment=st.secrets("PINECONE_ENVIRONMENT")
+        api_key=st.secrets["PINECONE_API_KEY"],
+        environment=st.secrets["PINECONE_ENVIRONMENT"]
     )
 
     index_name = "cases-index"
@@ -145,8 +145,8 @@ def query_search_engine(retriever, query):
 
 def build_case_query_engine(case_num):
     pinecone.init(
-        api_key=st.secrets("PINECONE_API_KEY"),
-        environment=st.secrets("PINECONE_ENVIRONMENT")
+        api_key=st.secrets["PINECONE_API_KEY"],
+        environment=st.secrets["PINECONE_ENVIRONMENT"]
     )
 
     index_name = "cases-index"
