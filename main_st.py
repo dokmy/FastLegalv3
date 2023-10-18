@@ -108,30 +108,43 @@ def build_search_engine():
 
     vector_index = VectorStoreIndex.from_vector_store(vector_store=vector_store)
 
-    filters = MetadataFilters(filters=[
-        ExactMatchFilter(
-            key = "content_type",
-            value = "case_itself"
-        )
-    ])
+    # filters = MetadataFilters(filters=[
+    #     ExactMatchFilter(
+    #         key = "content_type",
+    #         value = "case_itself"
+    #     )
+    # ])
 
     retriever = VectorIndexRetriever(
         index=vector_index,
-        similarity_top_k=3,
+        similarity_top_k=20,
         vector_store_query_mode="default",
-        filters=filters
+        # filters=filters
     )
     print("Top Level Search Engine Retriever created.")
     return retriever
 
 
-def query_search_engine(retriever, query):
+def query_search_engine(retriever, query, filters:list):
     
     nodes = retriever.retrieve(query)
     print(f"Nodes retrieved. Number of nodes: {len(nodes)}")
 
-    case_num_in_nodes = []
+    #Filter nodes by content_type
+    filtered_nodes = []
     for node in nodes:
+        try:
+            content_type = node.metadata["content_type"]
+            for filter in filters:
+                if content_type == filter:
+                    filtered_nodes.append(node)
+        except:
+            print("This node does not have content_type.")
+    print(f"Here is the number of filtered nodes based on content type: {len(filtered_nodes)}")
+
+    #Remove duplicate nodes and count unique case number
+    case_num_in_nodes = []
+    for node in filtered_nodes:
         try:
             case_num = node.metadata["case_num"]
             if case_num not in case_num_in_nodes:
@@ -168,10 +181,6 @@ def build_case_query_engine(case_num):
         ExactMatchFilter(
             key = "case_num",
             value = case_num
-        ),
-        ExactMatchFilter(
-            key = "content_type",
-            value = "case_itself"
         )
     ])
 
@@ -214,18 +223,43 @@ def query_case(case_num, query):
 
 
 st.sidebar.title("Search Legal Cases")
-
-user_input = st.sidebar.text_area("Describe your client's siutation:")
-submit_button = st.sidebar.button("Search")
+with st.sidebar:
+    st.markdown("**Describe your client's situation in the following box.**")
+    user_input = st.sidebar.text_area("Be as specific as possible:", placeholder="E.g. My client slips and falls in a shopping mall while working...")
+    st.markdown("**Select types of cases to search:**")
+    JUD_filter = st.checkbox("Judgments", value=True)
+    AOD_filter = st.checkbox("Assessment of Damages", value=True)
+    RUL_filter = st.checkbox("Rulings")
+    DEC_filter = st.checkbox("Decisions")
+    submit_button = st.sidebar.button("Search")
 
 
 if submit_button:
     with st.spinner('Generating answers...'):
+        filters = []
+        display_msgs = []
+        if JUD_filter:
+            filters.append("JUD")
+            display_msgs.append("Judgments")
+        if AOD_filter:
+            filters.append("AOD")
+            display_msgs.append("Assessment of Damages")
+        if RUL_filter:
+            filters.append("RUL")
+            display_msgs.append("Rulings")
+        if DEC_filter:
+            filters.append("DEC")
+            display_msgs.append("Decisions")
+        
+        st.markdown(f"Searching for {', '.join(map(str, display_msgs))}")
+        
+
         query = user_input
         retriever = build_search_engine()
-        list_of_case_num = query_search_engine(retriever, query)
-        st.markdown(f"**Found {len(list_of_case_num)} cases. Here are the search results:**")
-        for case_num in list_of_case_num:
+        list_of_case_num = query_search_engine(retriever, query, filters)
+
+        st.markdown(f"**Found {len(list_of_case_num)} cases. Showing top {min(5, len(list_of_case_num))} cases below with explanation:**")
+        for i in range(min(5,len(list_of_case_num))):
             # st.markdown(f"## {case_num}")
             ans_box = st.empty()
             box_id = "custom_ans_box"
@@ -243,11 +277,11 @@ if submit_button:
             )
 
             stream = []
-            for res in query_case(case_num, query):
+            for res in query_case(list_of_case_num[i], query):
                 stream.append(res)
                 answer = "".join(stream).strip()
                 ans_box.markdown(
-                    f'<div id="{box_id}"><h2>{case_num}</h2><br>{answer}</div>', 
+                    f'<div id="{box_id}"><h2>{list_of_case_num[i]}</h2><br>{answer}</div>', 
                     unsafe_allow_html=True
                                 )
                 # ans_box.markdown(f"{answer}")
@@ -263,5 +297,3 @@ if submit_button:
 # cases_folder_path = "./data/judgements_docx"
 # docs = build_docs(cases_folder_path) 
 # upsert_docs(docs)
-
-
