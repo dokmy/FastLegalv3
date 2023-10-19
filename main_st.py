@@ -257,11 +257,14 @@ if submit_button:
         query = user_input
         retriever = build_search_engine()
         list_of_case_num = query_search_engine(retriever, query, filters)
-
-        st.markdown(f"**Found {len(list_of_case_num)} case(s). Showing top {min(5, len(list_of_case_num))} case(s) below with explanation:**")
-        for i in range(min(5,len(list_of_case_num))):
+        final_list_of_case_num = list_of_case_num[:5]
+        st.markdown(f"**Found {len(list_of_case_num)} case(s). Showing top {len(final_list_of_case_num)} case(s) below with explanation:**")
+        
+        i = 0
+        for case_num in final_list_of_case_num:
             # st.markdown(f"## {case_num}")
-            with st.expander("Expand to see more"):
+            i = i+1
+            with st.expander(f"Case {i}: {case_num}"):
                 ans_box = st.empty()
                 # box_id = "custom_ans_box"
                 # st.markdown(
@@ -285,16 +288,3 @@ if submit_button:
                         f'<h2>{list_of_case_num[i]}</h2><br>{answer}</div>', 
                         unsafe_allow_html=True
                                     )
-
-
-            
-
-
-
-
-
-
-#ONLY RUN WHEN THERE'RE NEW DOCS TO UPSERT
-# cases_folder_path = "./data/judgements_docx"
-# docs = build_docs(cases_folder_path) 
-# upsert_docs(docs)
