@@ -258,33 +258,34 @@ if submit_button:
         retriever = build_search_engine()
         list_of_case_num = query_search_engine(retriever, query, filters)
 
-        st.markdown(f"**Found {len(list_of_case_num)} cases. Showing top {min(5, len(list_of_case_num))} cases below with explanation:**")
+        st.markdown(f"**Found {len(list_of_case_num)} case(s). Showing top {min(5, len(list_of_case_num))} case(s) below with explanation:**")
         for i in range(min(5,len(list_of_case_num))):
             # st.markdown(f"## {case_num}")
-            ans_box = st.empty()
-            box_id = "custom_ans_box"
-            st.markdown(
-                f"""
-                 <style>
-                    #{box_id} {{
-                        background-color: rgba(255, 165, 0, 0.5); 
-                        padding: 15px;
-                        border-radius: 10px;
-                    }}
-                </style>
-                """,
-                unsafe_allow_html=True,
-            )
+            with st.expander("Expand to see more"):
+                ans_box = st.empty()
+                # box_id = "custom_ans_box"
+                # st.markdown(
+                #     f"""
+                #     <style>
+                #         #{box_id} {{
+                #             background-color: rgba(255, 165, 0, 0.5); 
+                #             padding: 15px;
+                #             border-radius: 10px;
+                #         }}
+                #     </style>
+                #     """,
+                #     unsafe_allow_html=True,
+                # )
 
-            stream = []
-            for res in query_case(list_of_case_num[i], query):
-                stream.append(res)
-                answer = "".join(stream).strip()
-                ans_box.markdown(
-                    f'<div id="{box_id}"><h2>{list_of_case_num[i]}</h2><br>{answer}</div>', 
-                    unsafe_allow_html=True
-                                )
-                # ans_box.markdown(f"{answer}")
+                stream = []
+                for res in query_case(list_of_case_num[i], query):
+                    stream.append(res)
+                    answer = "".join(stream).strip()
+                    ans_box.markdown(
+                        f'<h2>{list_of_case_num[i]}</h2><br>{answer}</div>', 
+                        unsafe_allow_html=True
+                                    )
+
 
             
 

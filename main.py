@@ -17,6 +17,7 @@ from llama_index.retrievers import VectorIndexRetriever
 from langchain.chat_models import ChatOpenAI
 from llama_index.vector_stores.types import ExactMatchFilter, MetadataFilters
 import streamlit as st
+import asyncio
 
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -52,9 +53,6 @@ def build_context(model_name):
         llm=ChatOpenAI(temperature=0, model_name=model_name)
         )
     return ServiceContext.from_defaults(llm_predictor=llm_predictor)
-
-
-def upsert_docs(docs):
     pinecone.init(
         api_key=os.getenv("PINECONE_API_KEY"),
         environment=os.getenv("PINECONE_ENVIRONMENT")
@@ -206,20 +204,30 @@ def build_case_query_engine(case_num):
     return query_engine
 
 
-def query_case(case_num, query):
+async def query_case(case_num, query, expanders):
+
+    # st.expander({case_num})
+    # asyncio.sleep(1)
+    # st.expander({query})
+    # asyncio.sleep(1)
+    # st.expander({case_num})
+    
     query_engine = build_case_query_engine(case_num)
     response = query_engine.query(query)
-    # response.print_response_stream()
-    # for res in response.response_gen:
-    #     print(res)
-    return response.response_gen
+    res_gen = response.response_gen
+
+    stream = []
+    for res in res_gen:
+        stream.append(res)
+        answer = "".join(stream).strip()
+        expanders[case_num].write(answer)
 
 
-# query = "My client was speeding and hit a jaywalker."
-# retriever = build_search_engine()
-# list_of_case_num = query_search_engine(retriever, query)
-# for case_num in list_of_case_num:
-#     query_case(case_num, query)
+async def concurrent_tasks(list_of_case_num, query, expanders):
+
+    tasks = [query_case(case_num, query, expanders) for case_num in list_of_case_num]
+    return await asyncio.gather(*tasks)
+
 
 
 st.sidebar.title("Search Legal Cases")
@@ -252,50 +260,26 @@ if submit_button:
             display_msgs.append("Decisions")
         
         st.markdown(f"Searching for {', '.join(map(str, display_msgs))}")
-        
 
         query = user_input
         retriever = build_search_engine()
         list_of_case_num = query_search_engine(retriever, query, filters)
 
-        st.markdown(f"**Found {len(list_of_case_num)} cases. Showing top {min(5, len(list_of_case_num))} cases below with explanation:**")
-        for i in range(min(5,len(list_of_case_num))):
-            # st.markdown(f"## {case_num}")
-            ans_box = st.empty()
-            box_id = "custom_ans_box"
-            st.markdown(
-                f"""
-                 <style>
-                    #{box_id} {{
-                        background-color: rgba(255, 165, 0, 0.5); 
-                        padding: 15px;
-                        border-radius: 10px;
-                    }}
-                </style>
-                """,
-                unsafe_allow_html=True,
-            )
+        st.markdown(f"**Found {len(list_of_case_num)} case(s). Showing top {min(5, len(list_of_case_num))} case(s) below with explanation:**")
 
-            stream = []
-            for res in query_case(list_of_case_num[i], query):
-                stream.append(res)
-                answer = "".join(stream).strip()
-                ans_box.markdown(
-                    f'<div id="{box_id}"><h2>{list_of_case_num[i]}</h2><br>{answer}</div>', 
-                    unsafe_allow_html=True
-                                )
-                # ans_box.markdown(f"{answer}")
+        list_of_case_num = list_of_case_num[:5]
 
-            
+        expanders = {}
+        i=0
+        for case_num in list_of_case_num:
+            i=i+1
+            expanders[case_num] = st.expander(f"Case {i}: {case_num}")
+            expanders[case_num].write("")
 
-
-
-
-
-
-#ONLY RUN WHEN THERE'RE NEW DOCS TO UPSERT
-# cases_folder_path = "./data/judgements_docx"
-# docs = build_docs(cases_folder_path) 
-# upsert_docs(docs)
-
+        asyncio.run(concurrent_tasks(list_of_case_num, query, expanders))
+        # results = asyncio.run(concurrent_tasks(list_of_case_num, query))
+        # for case_num, answer in results:
+        #     with st.expander(f"Open to see more for {case_num}", expanded=True):
+        #         st.markdown(f"## {case_num}")
+        #         st.markdown(answer)
 
