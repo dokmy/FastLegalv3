@@ -281,10 +281,10 @@ if submit_button:
                 # )
 
                 stream = []
-                for res in query_case(list_of_case_num[i], query):
+                for res in query_case(case_num, query):
                     stream.append(res)
                     answer = "".join(stream).strip()
                     ans_box.markdown(
-                        f'<h2>{list_of_case_num[i]}</h2><br>{answer}</div>', 
+                        f'<h2>{case_num}</h2><br>{answer}</div>', 
                         unsafe_allow_html=True
                                     )
