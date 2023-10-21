@@ -17,7 +17,7 @@ from llama_index.retrievers import VectorIndexRetriever
 from langchain.chat_models import ChatOpenAI
 from llama_index.vector_stores.types import ExactMatchFilter, MetadataFilters
 import streamlit as st
-import html
+import asyncio
 
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -53,9 +53,6 @@ def build_context(model_name):
         llm=ChatOpenAI(temperature=0, model_name=model_name)
         )
     return ServiceContext.from_defaults(llm_predictor=llm_predictor)
-
-
-def upsert_docs(docs):
     pinecone.init(
         api_key=os.getenv("PINECONE_API_KEY"),
         environment=os.getenv("PINECONE_ENVIRONMENT")
@@ -206,27 +203,79 @@ def build_case_query_engine(case_num):
     print("Query engine created.")
     return query_engine
 
-@st.cache_resource
-def query_case(case_num, query):
-    query_engine = build_case_query_engine(case_num)
-    response = query_engine.query(query)
 
-    return response.response_gen
+async def query_case(case_num, query):
 
+    # st.expander({case_num})
+    # asyncio.sleep(1)
+    # st.expander({query})
+    # asyncio.sleep(1)
+    # st.expander({case_num})
 
-st.set_page_config(
-        page_title="Search Any Case",
-        page_icon="🔍",
-        layout="centered",
-        initial_sidebar_state="expanded",
-        menu_items={
-            'Get Help': 'https://www.extremelycoolapp.com/help',
-            'Report a bug': "https://www.extremelycoolapp.com/bug",
-            'About': "# Find me at adrien@stepone.agency"
-            }
+    pinecone.init(
+        api_key=os.getenv("PINECONE_API_KEY"),
+        environment=os.getenv("PINECONE_ENVIRONMENT")
     )
 
-st.title(":mag: Search Any Cases")
+    index_name = "cases-index"
+    if index_name not in pinecone.list_indexes():
+        pinecone.create_index(
+            index_name,
+            dimension=1536,
+            metric='cosine'
+        )
+        print("Pinecone canvas does not exist. Just created and connected.")
+    pinecone_index = pinecone.Index(index_name)
+    print("Pinecone canvas already exists. Now we're connected.")
+    
+    vector_store = PineconeVectorStore(pinecone_index=pinecone_index)
+
+    vector_index = VectorStoreIndex.from_vector_store(vector_store=vector_store)
+
+    filters = MetadataFilters(filters=[
+        ExactMatchFilter(
+            key = "case_num",
+            value = case_num
+        )
+    ])
+
+    PROMPT_TEMPLATE = (
+        "Here are the context information:"
+        "\n------------------------------\n"
+        "{context_str}"
+        "\n------------------------------\n"
+        "You are a AI legal assistant for lawyers in Hong Kong. Answer the follwing question in two parts. Break down these two parts with sub-headings. First, explained what happened in the case for reference in the context. Second, explain how this case is relevant to the following siutation or question: {query_str}. \n"
+        )
+    
+    QA_PROMPT = QuestionAnswerPrompt(PROMPT_TEMPLATE)
+
+    query_engine = vector_index.as_query_engine(
+        similarity_top_k=3,
+        vector_store_query_mode="default",
+        filters=filters,
+        text_qa_template=QA_PROMPT,
+        streaming = True,
+        service_context=build_context("gpt-3.5-turbo")
+    )
+
+
+    # query_engine = build_case_query_engine(case_num)
+    print("hahah i am dokmy.")
+    response = query_engine.query(query)
+    res_gen = response.response_gen
+    res_box = st.empty()
+    stream = []
+    for res in res_gen:
+        stream.append(res)
+        answer = "".join(stream).strip()
+        res_box.write(answer)
+
+
+async def concurrent_tasks(list_of_case_num, query):
+    tasks = [query_case(case_num, query) for case_num in list_of_case_num]
+    return await asyncio.gather(*tasks)
+
+
 
 st.sidebar.title("Search Legal Cases")
 with st.sidebar:
@@ -238,23 +287,11 @@ with st.sidebar:
     RUL_filter = st.checkbox("Rulings")
     DEC_filter = st.checkbox("Decisions")
     submit_button = st.sidebar.button("Search")
-    
-# if "tabs" not in st.session_state:
-#     st.session_state.tabs = ["Search Results"]
 
-if "search_results" not in st.session_state:
-    st.session_state.search_results = None
-
-# if "finished" not in st.session_state:
-#     st.session_state.finished = []
-
-
-filters = []
-
-# if st.session_state.search_results == None:
 
 if submit_button:
     with st.spinner('Generating answers...'):
+        filters = []
         display_msgs = []
         if JUD_filter:
             filters.append("JUD")
@@ -270,89 +307,27 @@ if submit_button:
             display_msgs.append("Decisions")
         
         st.markdown(f"Searching for {', '.join(map(str, display_msgs))}")
-    
+
         query = user_input
         retriever = build_search_engine()
         list_of_case_num = query_search_engine(retriever, query, filters)
+
+        st.markdown(f"**Found {len(list_of_case_num)} case(s). Showing top {min(5, len(list_of_case_num))} case(s) below with explanation:**")
+
         final_list_of_case_num = list_of_case_num[:5]
-        st.session_state.search_results = final_list_of_case_num
-        st.markdown(f"**Found {len(list_of_case_num)} case(s). Showing top {len(final_list_of_case_num)} case(s) below with explanation:**")
+        asyncio.run(concurrent_tasks(final_list_of_case_num, query))
+
+        # expanders = {}
+        # i=0
+        # for case_num in list_of_case_num:
+        #     i=i+1
+        #     expanders[case_num] = st.expander(f"Case {i}: {case_num}")
+        #     expanders[case_num].write("")
+
         
-
-        i = 0
-        for case_num in st.session_state.search_results:
-            i = i+1
-            with st.expander(f"Case {i}: {case_num}"):
-                # button = st.button("Chat with this case!", key=f"{case_num}")
-                link = f'[Chat with this case!](localhost:8566?case_num={case_num})'
-                st.markdown(link, unsafe_allow_html=True)
-
-                # if button:
-                #     if case_num not in st.session_state["tabs"]:
-                #         st.session_state["tabs"].append(case_num)
-                #         st.experimental_rerun()
-
-                ans_box = st.empty()
-
-                # stream = []
-                if case_num in st.session_state:
-                    stream = st.session_state[f"{case_num}"]
-                else:
-                    stream = []
-
-                for res in query_case(case_num, query):
-                    stream.append(res)
-                    answer = "".join(stream).strip()
-                    ans_box.markdown(
-                        f'<h2>{case_num}</h2><br>{answer}</div>', 
-                        unsafe_allow_html=True
-                                    )
-                    st.session_state[f"{case_num}"] = stream
-    
-# else:
-#     # st.write("Have search results. I am here.")
-#     # st.write(st.session_state)
-    
-#     i = 0
-#     for case_num in st.session_state.search_results:
-#         i = i+1
-#         with st.expander(f"Case {i}: {case_num}"):
-#             button = st.button("Chat with this case!", key=f"{case_num}_button")
-
-#             if button:
-#                 if case_num not in st.session_state["tabs"]:
-#                     st.session_state["tabs"].append(case_num)
-#                     st.experimental_rerun()
-
-#             ans_box = st.empty()
-
-#             # stream = []
-#             if case_num not in st.session_state.finished:
-#                 if case_num in st.session_state:
-#                     stream = st.session_state[f"{case_num}"]
-#                 else:
-#                     stream = []
-#                 query = user_input
-#                 for res in query_case(case_num, query):
-#                     stream.append(res)
-#                     answer = "".join(stream).strip()
-#                     ans_box.markdown(
-#                         f'<h2>{case_num}</h2><br>{answer}</div>', 
-#                         unsafe_allow_html=True
-#                                     )
-#                     st.session_state[f"{case_num}"] = stream
-#                 st.write("Done for one case.")
-#                 st.session_state.finished.append(case_num)
-
-#             else:
-#                 stream = []
-#                 for res in st.session_state[f"{case_num}"]:
-#                     stream.append(res)
-#                     answer = "".join(stream).strip()
-#                     ans_box.markdown(
-#                         f'<h2>{case_num}</h2><br>{answer}</div>', 
-#                         unsafe_allow_html=True
-#                                     )
-#                     st.session_state[f"{case_num}"] = stream
-
+        # results = asyncio.run(concurrent_tasks(list_of_case_num, query))
+        # for case_num, answer in results:
+        #     with st.expander(f"Open to see more for {case_num}", expanded=True):
+        #         st.markdown(f"## {case_num}")
+        #         st.markdown(answer)
 
