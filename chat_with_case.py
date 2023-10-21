@@ -121,8 +121,10 @@ def main():
     
     if params:
         incoming = params['case_num'][0]
+        incoming_query = params['query'][0].replace("_"," ")
     else:
         incoming = 0
+        incoming_query = "Your question"
 
     st.set_page_config(
         page_title=":robot_face:Chat with Any Case",
@@ -154,7 +156,7 @@ def main():
         st.session_state.selected_case = None
     
 
-    if prompt := st.chat_input("Your question"):
+    if prompt := st.chat_input(placeholder=incoming_query):
         st.session_state.messages.append({"role": "user", "content": prompt})
         st.session_state.streaming = True
 
