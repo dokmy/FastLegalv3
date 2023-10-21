@@ -284,7 +284,7 @@ if submit_button:
             i = i+1
             with st.expander(f"Case {i}: {case_num}"):
                 # button = st.button("Chat with this case!", key=f"{case_num}")
-                link = f'[Chat with this case!](localhost:8566?case_num={case_num})'
+                link = f'[Chat with this case!](localhost:8566/?case_num={case_num})'
                 st.markdown(link, unsafe_allow_html=True)
 
                 # if button:
