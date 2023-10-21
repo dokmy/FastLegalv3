@@ -17,8 +17,9 @@ from llama_index.retrievers import VectorIndexRetriever
 from langchain.chat_models import ChatOpenAI
 from llama_index.vector_stores.types import ExactMatchFilter, MetadataFilters
 import streamlit as st
+import html
 
-# load_dotenv()
+load_dotenv()
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 def create_list_of_case_numbers(cases_folder_path):
@@ -205,22 +206,27 @@ def build_case_query_engine(case_num):
     print("Query engine created.")
     return query_engine
 
-
+@st.cache_resource
 def query_case(case_num, query):
     query_engine = build_case_query_engine(case_num)
     response = query_engine.query(query)
-    # response.print_response_stream()
-    # for res in response.response_gen:
-    #     print(res)
+
     return response.response_gen
 
 
-# query = "My client was speeding and hit a jaywalker."
-# retriever = build_search_engine()
-# list_of_case_num = query_search_engine(retriever, query)
-# for case_num in list_of_case_num:
-#     query_case(case_num, query)
+st.set_page_config(
+        page_title="Search Any Case",
+        page_icon="🔍",
+        layout="centered",
+        initial_sidebar_state="expanded",
+        menu_items={
+            'Get Help': 'https://www.extremelycoolapp.com/help',
+            'Report a bug': "https://www.extremelycoolapp.com/bug",
+            'About': "# Find me at adrien@stepone.agency"
+            }
+    )
 
+st.title(":mag: Search Any Cases")
 
 st.sidebar.title("Search Legal Cases")
 with st.sidebar:
@@ -232,11 +238,23 @@ with st.sidebar:
     RUL_filter = st.checkbox("Rulings")
     DEC_filter = st.checkbox("Decisions")
     submit_button = st.sidebar.button("Search")
+    
+# if "tabs" not in st.session_state:
+#     st.session_state.tabs = ["Search Results"]
 
+if "search_results" not in st.session_state:
+    st.session_state.search_results = None
+
+# if "finished" not in st.session_state:
+#     st.session_state.finished = []
+
+
+filters = []
+
+# if st.session_state.search_results == None:
 
 if submit_button:
     with st.spinner('Generating answers...'):
-        filters = []
         display_msgs = []
         if JUD_filter:
             filters.append("JUD")
@@ -252,35 +270,36 @@ if submit_button:
             display_msgs.append("Decisions")
         
         st.markdown(f"Searching for {', '.join(map(str, display_msgs))}")
-        
-
+    
         query = user_input
         retriever = build_search_engine()
         list_of_case_num = query_search_engine(retriever, query, filters)
         final_list_of_case_num = list_of_case_num[:5]
+        st.session_state.search_results = final_list_of_case_num
         st.markdown(f"**Found {len(list_of_case_num)} case(s). Showing top {len(final_list_of_case_num)} case(s) below with explanation:**")
         
+
         i = 0
-        for case_num in final_list_of_case_num:
-            # st.markdown(f"## {case_num}")
+        for case_num in st.session_state.search_results:
             i = i+1
             with st.expander(f"Case {i}: {case_num}"):
-                ans_box = st.empty()
-                # box_id = "custom_ans_box"
-                # st.markdown(
-                #     f"""
-                #     <style>
-                #         #{box_id} {{
-                #             background-color: rgba(255, 165, 0, 0.5); 
-                #             padding: 15px;
-                #             border-radius: 10px;
-                #         }}
-                #     </style>
-                #     """,
-                #     unsafe_allow_html=True,
-                # )
+                # button = st.button("Chat with this case!", key=f"{case_num}")
+                link = f'[Chat with this case!](localhost:8566?case_num={case_num})'
+                st.markdown(link, unsafe_allow_html=True)
 
-                stream = []
+                # if button:
+                #     if case_num not in st.session_state["tabs"]:
+                #         st.session_state["tabs"].append(case_num)
+                #         st.experimental_rerun()
+
+                ans_box = st.empty()
+
+                # stream = []
+                if case_num in st.session_state:
+                    stream = st.session_state[f"{case_num}"]
+                else:
+                    stream = []
+
                 for res in query_case(case_num, query):
                     stream.append(res)
                     answer = "".join(stream).strip()
@@ -288,3 +307,52 @@ if submit_button:
                         f'<h2>{case_num}</h2><br>{answer}</div>', 
                         unsafe_allow_html=True
                                     )
+                    st.session_state[f"{case_num}"] = stream
+    
+# else:
+#     # st.write("Have search results. I am here.")
+#     # st.write(st.session_state)
+    
+#     i = 0
+#     for case_num in st.session_state.search_results:
+#         i = i+1
+#         with st.expander(f"Case {i}: {case_num}"):
+#             button = st.button("Chat with this case!", key=f"{case_num}_button")
+
+#             if button:
+#                 if case_num not in st.session_state["tabs"]:
+#                     st.session_state["tabs"].append(case_num)
+#                     st.experimental_rerun()
+
+#             ans_box = st.empty()
+
+#             # stream = []
+#             if case_num not in st.session_state.finished:
+#                 if case_num in st.session_state:
+#                     stream = st.session_state[f"{case_num}"]
+#                 else:
+#                     stream = []
+#                 query = user_input
+#                 for res in query_case(case_num, query):
+#                     stream.append(res)
+#                     answer = "".join(stream).strip()
+#                     ans_box.markdown(
+#                         f'<h2>{case_num}</h2><br>{answer}</div>', 
+#                         unsafe_allow_html=True
+#                                     )
+#                     st.session_state[f"{case_num}"] = stream
+#                 st.write("Done for one case.")
+#                 st.session_state.finished.append(case_num)
+
+#             else:
+#                 stream = []
+#                 for res in st.session_state[f"{case_num}"]:
+#                     stream.append(res)
+#                     answer = "".join(stream).strip()
+#                     ans_box.markdown(
+#                         f'<h2>{case_num}</h2><br>{answer}</div>', 
+#                         unsafe_allow_html=True
+#                                     )
+#                     st.session_state[f"{case_num}"] = stream
+
+
