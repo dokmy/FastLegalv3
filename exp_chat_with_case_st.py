@@ -140,7 +140,7 @@ def main():
     
     st.title(":robot_face: Chat with Any Case")
 
-    cases_folder_path = "/Users/adrienkwong/Downloads/FastLegal files/FastLegal - LlamaIndex + Streamlit/data/DCPI"
+    cases_folder_path = "./data/DCPI"
     list_of_case_numbers = create_list_of_case_numbers(cases_folder_path)
     
     st.sidebar.title("Prompt Template Experimentation")
