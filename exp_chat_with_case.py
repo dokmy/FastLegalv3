@@ -20,7 +20,7 @@ import streamlit as st
 import sys
 
 load_dotenv()
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # if len(sys.argv) < 2:
 #     print("No argument")
@@ -41,11 +41,11 @@ def create_list_of_case_numbers(cases_folder_path):
     return list_of_case_numbers
 
 
-def build_case_query_engine(case_num):
+def build_case_query_engine(case_num, prompt_template):
 
     pinecone.init(
-        api_key=st.secrets["PINECONE_API_KEY"],
-        environment=st.secrets["PINECONE_ENVIRONMENT"]
+        api_key=os.getenv("PINECONE_API_KEY"),
+        environment=os.getenv("PINECONE_ENVIRONMENT")
     )
 
     index_name = "cases-index"
@@ -78,13 +78,15 @@ def build_case_query_engine(case_num):
     #     "You are a AI legal assistant for lawyers in Hong Kong. Answer the follwing question in two parts. Break down these two parts with sub-headings. First, explained what happened in the case for reference in the context. Second, explain how this case is relevant to the following siutation or question: {query_str}. \n"
     #     )
 
-    PROMPT_TEMPLATE = (
-        "Here are the context information:"
-        "\n---------------------------------\n"
-        "{context_str}"
-        "\n---------------------------------\n"
-        "You are a AI legal assistant for lawyers in Hong Kong. Answer your question based on the context given and you must mention the exact sentences or paragraphs you used to return the answer of this question: {query_str}"
-    )
+    PROMPT_TEMPLATE = (prompt_template)
+
+    # PROMPT_TEMPLATE = (
+    #     "Here are the context information:"
+    #     "\n---------------------------------\n"
+    #     "{context_str}"
+    #     "\n---------------------------------\n"
+    #     "You are a AI legal assistant for lawyers in Hong Kong. Answer your question based on the context given and you must mention the exact sentences or paragraphs you used to return the answer of this question: {query_str}"
+    # )
     
     QA_PROMPT = QuestionAnswerPrompt(PROMPT_TEMPLATE)
 
@@ -107,8 +109,8 @@ def build_context(model_name):
     return ServiceContext.from_defaults(llm_predictor=llm_predictor)
 
 
-def query_case(case_num, query):
-    query_engine = build_case_query_engine(case_num)
+def query_case(case_num, query, prompt_template):
+    query_engine = build_case_query_engine(case_num, prompt_template)
     response = query_engine.query(query)
     # print("HAHAH")
     # print(response.get_formatted_sources().strip())
@@ -138,8 +140,23 @@ def main():
     
     st.title(":robot_face: Chat with Any Case")
 
-    cases_folder_path = "./data/DCPI"
+    cases_folder_path = "/Users/adrienkwong/Downloads/FastLegal files/FastLegal - LlamaIndex + Streamlit/data/DCPI"
     list_of_case_numbers = create_list_of_case_numbers(cases_folder_path)
+    
+    st.sidebar.title("Prompt Template Experimentation")
+    with st.sidebar:
+        user_input_prompt_template = st.sidebar.text_area("Prompt Template:", placeholder="See below as an example.")
+        st.button("submit")
+        st.divider()
+        st.markdown("**Original prompt template:**")
+        st.code("Here are the context information:"
+        "\n---------------------------------\n"
+        "{context_str}"
+        "\n---------------------------------\n"
+        "You are a AI legal assistant for lawyers in Hong Kong. Answer your question based on the context given and you must mention the exact sentences or paragraphs you used to return the answer of this question: {query_str}")
+        st.divider()
+        st.markdown("**Prompt template you're using**")
+        st.code(user_input_prompt_template)
     
     if "messages" not in st.session_state.keys():
         st.session_state.messages = [
@@ -190,7 +207,7 @@ def main():
     if st.session_state.messages[-1]["role"] != "assistant":
         with st.chat_message("assistant"):
             with st.spinner("Generating answer..."):
-                response = query_case(case_num, prompt)
+                response = query_case(case_num, prompt, user_input_prompt_template)
                 ans_box = st.empty()
                 stream = []
                 for res in response:
