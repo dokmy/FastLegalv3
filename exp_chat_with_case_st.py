@@ -137,8 +137,9 @@ def main():
             'About': "# Find me at adrien@stepone.agency"
             }
     )
-    
+    st.info("This is just an experimental version to test prompt template.", icon="ℹ️")
     st.title(":robot_face: Chat with Any Case")
+    
 
     cases_folder_path = "./data/DCPI"
     list_of_case_numbers = create_list_of_case_numbers(cases_folder_path)

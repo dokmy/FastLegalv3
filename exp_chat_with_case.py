@@ -137,9 +137,9 @@ def main():
             'About': "# Find me at adrien@stepone.agency"
             }
     )
-    
+    st.info("This is just an experimental version to test prompt template.", icon="ℹ️")
     st.title(":robot_face: Chat with Any Case")
-    st.warning("This is just an experimental version to test prompt template.")
+    
 
     cases_folder_path = "/Users/adrienkwong/Downloads/FastLegal files/FastLegal - LlamaIndex + Streamlit/data/DCPI"
     list_of_case_numbers = create_list_of_case_numbers(cases_folder_path)
