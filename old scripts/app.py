@@ -2,10 +2,9 @@ import logging
 import sys
 import os
 import openai
-from dotenv import load_dotenv, dotenv_values
+from dotenv import load_dotenv
 import streamlit as st
-from llama_index import SimpleDirectoryReader, LLMPredictor, get_response_synthesizer, SummaryIndex, VectorStoreIndex, ServiceContext, Document
-from llama_index.indices.document_summary import DocumentSummaryIndex
+from llama_index import SimpleDirectoryReader, get_response_synthesizer, SummaryIndex, VectorStoreIndex, ServiceContext
 from llama_index.tools import QueryEngineTool, ToolMetadata
 from llama_index.schema import IndexNode
 from llama_index.llms import OpenAI

@@ -56,27 +56,6 @@ def create_folder_of_summaries(folder_path):
             legal_represenation = query_engine.query("List out the legal represenative or the lawyer(s) for the plaintiff(s) and the defendant(s) respectively.")
             plaintff_and_defendant = query_engine.query("This case is between who (plaintiff) and who (defendant)? Please list out the names of all plaintiffs and defendants.")
             accident_circumstances = query_engine.query("Please describe the accident involved, which is usually mentioned in the introduction. How did the accident happened? What occured before the moment of accident? What exactly cause the injury? For example, the plaintiff is hit by a vehicle and that caused the accident. Another example is the plaintiff sprained his back while lifting some heavy goods.")
-            
-            # print("Date of Hearing: ",date_of_hearing)
-            # print("Date of Judgement: ",date_of_judgement)
-            # print("judge: ",judge)
-            # print("background_of_plaintiffs: ", background_of_plaintiffs)
-            # print("background_facts_of_case: ", background_facts_of_case)
-            # print(background_facts_of_case.source_nodes)
-            # print("legal_issues: ", legal_issues)
-            # print("ruilings: ", ruilings)
-            # print("injury:", injury)
-            # print("loss_of_amenities: ",loss_of_amenities)
-            # print("medical_evidence: ", medical_evidence)
-            # print("earnings_of_plaintiff: ",earnings_of_plaintiff)
-            # print("quantum:", quantum)
-            # print("issues_related_to_quantum: ",issues_related_to_quantum)
-            # print("costs: ",costs)
-            # print("legal_representation: ",legal_represenation)
-            # print("hahahahah")
-            # print("plaintff_and_defendant: ", plaintff_and_defendant)
-            # print("accident_circumstances: ", accident_circumstances.response)
-            # print(accident_circumstances.source_nodes)
 
             summary = (
                 "Date of Hearing: ", date_of_hearing.response,
@@ -98,6 +77,8 @@ def create_folder_of_summaries(folder_path):
                 "\n\nAccident circumstances: ", accident_circumstances.response
                 )
             
+
+            
             with open(summaries_path/f"{case_number}.txt", "w") as f:
                 f.write("\n".join(summary))
                 print("hi. Summary for ",case_number," is done.")
@@ -113,7 +94,26 @@ if __name__ == "__main__":
     create_folder_of_summaries(folder_path)
 
 
-
+ # print("Date of Hearing: ",date_of_hearing)
+            # print("Date of Judgement: ",date_of_judgement)
+            # print("judge: ",judge)
+            # print("background_of_plaintiffs: ", background_of_plaintiffs)
+            # print("background_facts_of_case: ", background_facts_of_case)
+            # print(background_facts_of_case.source_nodes)
+            # print("legal_issues: ", legal_issues)
+            # print("ruilings: ", ruilings)
+            # print("injury:", injury)
+            # print("loss_of_amenities: ",loss_of_amenities)
+            # print("medical_evidence: ", medical_evidence)
+            # print("earnings_of_plaintiff: ",earnings_of_plaintiff)
+            # print("quantum:", quantum)
+            # print("issues_related_to_quantum: ",issues_related_to_quantum)
+            # print("costs: ",costs)
+            # print("legal_representation: ",legal_represenation)
+            # print("hahahahah")
+            # print("plaintff_and_defendant: ", plaintff_and_defendant)
+            # print("accident_circumstances: ", accident_circumstances.response)
+            # print(accident_circumstances.source_nodes)
 
 
 

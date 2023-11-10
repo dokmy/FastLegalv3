@@ -16,7 +16,7 @@ from llama_index.vector_stores import PineconeVectorStore
 from llama_index.retrievers import VectorIndexRetriever
 from langchain.chat_models import ChatOpenAI
 from llama_index.vector_stores.types import ExactMatchFilter, MetadataFilters
-import streamlit as st
+import streamlit as stxsz
 
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -31,7 +31,7 @@ def create_list_of_case_numbers(cases_folder_path):
     return list_of_case_numbers
 
 
-def build_docs(cases_folder_path, content_type):
+def build_docs(cases_folder_path, tag):
     docs = []
     docs = SimpleDirectoryReader(input_dir=cases_folder_path).load_data()
     for doc in docs:
@@ -39,9 +39,10 @@ def build_docs(cases_folder_path, content_type):
         fn = doc.metadata["file_name"]
         case_num = fn.replace(".docx","")
         doc.metadata = {
-            "content_type": content_type,
+            # "content_type": content_type,
             "fn": fn,
-            "case_num": case_num
+            "case_num": case_num,
+            "tag": tag
             }
     print(f"Docs created. Number of docs: {len(docs)}")
     return docs
@@ -115,7 +116,7 @@ def delete_vectors():
     # delete_response = pinecone_index.delete(delete_all=True)
     
 
-def count_by_metadata(content_type):
+def count_by_metadata(tag):
     pinecone.init(
         api_key=os.getenv("PINECONE_API_KEY"),
         environment=os.getenv("PINECONE_ENVIRONMENT")
@@ -132,19 +133,19 @@ def count_by_metadata(content_type):
     pinecone_index = pinecone.Index(index_name)
     print("Pinecone canvas already exists. Now we're connected.")
 
-    stats = pinecone_index.describe_index_stats(filter={"content_type": content_type})
+    stats = pinecone_index.describe_index_stats(filter={"tag": tag})
 
 
     print(stats)
 
 
 print("Before upseting...")
-content_type = "RUL"
-count_by_metadata(content_type)
+tag = "test1"
+count_by_metadata(tag)
 
-cases_folder_path = "/Users/adrienkwong/Downloads/FastLegal files/FastLegal - LlamaIndex + Streamlit/data/DCPI/ruling"
-docs = build_docs(cases_folder_path, content_type)
-# upsert_docs(docs)
+cases_folder_path = "/Users/adrienkwong/Desktop/test"
+docs = build_docs(cases_folder_path, tag)
+upsert_docs(docs)
 
 print("After upseting...")
-count_by_metadata(content_type)
+count_by_metadata(tag)
