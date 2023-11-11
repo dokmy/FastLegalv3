@@ -15,7 +15,7 @@ import streamlit as st
 import json
 from datetime import datetime
 
-load_dotenv()
+load_dotenv("./.env")
 
 try:
     openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -134,21 +134,21 @@ def query_pinecone(query_embedding, filters):
 
 
 
-st.set_page_config(
-        page_title="Search Any Case",
-        page_icon="🔍",
-        layout="centered",
-        initial_sidebar_state="expanded",
-        menu_items={
-            'Get Help': 'https://www.extremelycoolapp.com/help',
-            'Report a bug': "https://www.extremelycoolapp.com/bug",
-            'About': "# Find me at adrien@stepone.agency"
-            }
-    )
+# st.set_page_config(
+#         page_title="Search Any Case",
+#         page_icon="🔍",
+#         layout="centered",
+#         initial_sidebar_state="expanded",
+#         menu_items={
+#             'Get Help': 'https://www.extremelycoolapp.com/help',
+#             'Report a bug': "https://www.extremelycoolapp.com/bug",
+#             'About': "# Find me at adrien@stepone.agency"
+#             }
+#     )
 
-st.title(":mag: Search Any Cases")
+st.title(":mag: Search by Situation")
 
-st.sidebar.title("Search Legal Cases")
+st.sidebar.title("Search by Situation")
 
 with st.sidebar:
     st.markdown("**Describe your client's situation in the following box.**")
