@@ -1,0 +1,228 @@
+import os
+import dotenv
+from dotenv import load_dotenv
+import openai
+from llama_index import(
+    SimpleDirectoryReader,
+    VectorStoreIndex,
+    StorageContext,
+    ServiceContext,
+    LLMPredictor,
+    GPTVectorStoreIndex,
+    QuestionAnswerPrompt
+)
+import pinecone
+from llama_index.vector_stores import PineconeVectorStore
+from llama_index.retrievers import VectorIndexRetriever
+from langchain.chat_models import ChatOpenAI
+from llama_index.vector_stores.types import ExactMatchFilter, MetadataFilters
+import streamlit as st
+import json
+from datetime import datetime
+import time
+
+
+load_dotenv("./.env")
+
+try:
+    openai.api_key = os.getenv("OPENAI_API_KEY")
+    pinecone_api_key = os.getenv("PINECONE_API_KEY")
+    pinecone_environment = os.getenv("PINECONE_ENVIRONMENT")
+
+except:
+    openai.api_key = st.secrets["OPENAI_API_KEY"]
+    pinecone_api_key = st.secrets["PINECONE_API_KEY"]
+    pinecone_environment = st.secrets["PINECONE_ENVIRONMENT"]
+
+
+
+        
+
+@st.cache_data
+def get_all_case_nos():
+    all_action_nos = []
+
+    all_jsonl_files = os.listdir("./all_jsonl")
+    for jsonl_file in all_jsonl_files:
+        path = f"./all_jsonl/{jsonl_file}"
+        with open (path, "r") as file:
+            for row in file:
+                data = json.loads(row)
+                action_no = data["cases_act"]
+                all_action_nos.append(action_no)
+    return all_action_nos
+
+
+def build_case_query_engine(action_no):
+    pinecone.init(
+        api_key=pinecone_api_key,
+        environment=pinecone_environment
+    )
+
+    index_name = "cases-index"
+    if index_name not in pinecone.list_indexes():
+        pinecone.create_index(
+            index_name,
+            dimension=1536,
+            metric='cosine'
+        )
+        print("Pinecone canvas does not exist. Just created and connected.")
+    pinecone_index = pinecone.Index(index_name)
+    print("Pinecone canvas already exists. Now we're connected.")
+
+    vector_store = PineconeVectorStore(pinecone_index=pinecone_index)
+
+    vector_index = VectorStoreIndex.from_vector_store(vector_store=vector_store)
+
+    filters = MetadataFilters(filters=[
+        ExactMatchFilter(
+            key = "cases_act",
+            value = action_no
+        )
+    ])
+
+    # PROMPT_TEMPLATE = (
+    #     "Here are the context information:"
+    #     "\n------------------------------\n"
+    #     "{context_str}"
+    #     "\n------------------------------\n"
+    #     "You are a AI legal assistant for lawyers in Hong Kong. Answer the follwing question in two parts. Break down these two parts with sub-headings. First, explained what happened in the case for reference in the context. Second, explain how this case is relevant to the following siutation or question: {query_str}. \n"
+    #     )
+
+    PROMPT_TEMPLATE = (
+        "Here are the context information:"
+        "\n---------------------------------\n"
+        "{context_str}"
+        "\n---------------------------------\n"
+        "You are a AI legal assistant for lawyers in Hong Kong. Answer your question based on the context given and you must mention the exact sentences or paragraphs you used to return the answer of this question: {query_str}"
+    )
+    
+    QA_PROMPT = QuestionAnswerPrompt(PROMPT_TEMPLATE)
+
+    query_engine = vector_index.as_query_engine(
+        similarity_top_k=3,
+        vector_store_query_mode="default",
+        filters=filters,
+        text_qa_template=QA_PROMPT,
+        streaming = True,
+        service_context=build_context("gpt-3.5-turbo")
+    )
+    print("Query engine created.")
+    return query_engine
+
+
+def build_context(model_name):
+    llm_predictor = LLMPredictor(
+        llm=ChatOpenAI(temperature=0, model_name=model_name)
+        )
+    return ServiceContext.from_defaults(llm_predictor=llm_predictor)
+
+
+def query_case(case_num, query):
+    query_engine = build_case_query_engine(case_num)
+    response = query_engine.query(query)
+
+    return response.response_gen
+
+
+
+def get_metadata(action_no):
+    all_jsonl_files = os.listdir("./all_jsonl")
+    for jsonl_file in all_jsonl_files:
+        path = f"./all_jsonl/{jsonl_file}"
+        with open (path, "r") as file:
+            for row in file:
+                data = json.loads(row)
+                if action_no == data['cases_act']:
+                    case_title = data['cases_title']
+
+                    date_object = datetime.fromisoformat(data['date'])
+                    case_date = date_object.strftime("%d %b, %Y")
+
+                    case_db = data['db']
+                    case_neutral_cit = data['neutral_cit']
+
+    return case_title, case_date, case_db, case_neutral_cit
+
+
+def main():
+
+    st.title(":robot_face: Chat with Any Case")
+
+    
+    all_act_nos = get_all_case_nos()
+
+    
+    if "messages" not in st.session_state.keys():
+        st.session_state.messages = [
+            {"role": "assistant", "content": f"Ask me a question about this case!"}
+        ]
+
+    if "streaming" not in st.session_state:
+        st.session_state.streaming = False
+
+        
+    if "case_to_chat" not in st.session_state:
+        st.session_state.case_to_chat = None
+
+
+    if prompt := st.chat_input("Your question"):
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        st.session_state.streaming = True
+
+    
+
+    if st.session_state.streaming:
+        st.warning("Please wait for the current answer to complete.")
+        st.selectbox(
+        'Which case would you like to chat with?',
+        ("Please wait...",), disabled=True)
+        case_to_chat = st.session_state.case_to_chat
+    else:
+        if st.session_state.case_to_chat != None:
+            index = all_act_nos.index(st.session_state.case_to_chat)
+        else:
+            index = 0
+        
+        selected_case_act_no = st.selectbox('Which case would you like to chat with?',
+                                            (all_act_nos), 
+                                            index=index)
+        
+        if selected_case_act_no != st.session_state.case_to_chat:
+            st.session_state.case_to_chat = selected_case_act_no
+            st.session_state.messages = [
+                {"role": "assistant", "content": f"Ask me a question about case {st.session_state.case_to_chat}."}
+            ]
+        
+
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.write(message["content"])
+
+    if st.session_state.messages[-1]["role"] != "assistant":
+        with st.chat_message("assistant"):
+            with st.spinner("Generating answer..."):
+                response = query_case(case_to_chat, prompt)
+                ans_box = st.empty()
+                stream = []
+                for res in response:
+                    stream.append(res)
+                    answer = "".join(stream).strip()
+                    ans_box.markdown(answer)
+                message = {"role": "assistant", "content": answer}
+                st.session_state.messages.append(message)
+                st.session_state.streaming = False
+                st.experimental_rerun()
+    
+    
+    with st.sidebar:
+        case_title, case_date, case_db, case_neutral_cit = get_metadata(st.session_state['case_to_chat'])
+        st.markdown("**Selected Case:**")
+        st.markdown(f"Date: {case_date}")
+        st.markdown(f"Action No.: {st.session_state['case_to_chat']}")
+        st.markdown(f"Neutral Cit.: {case_neutral_cit}")
+        st.markdown(f"Title: {case_title}")
+        st.markdown(f"Court: {case_db}")
+        st.write(st.session_state['case_to_chat'])
+if __name__ == "__main__":
+    main()
