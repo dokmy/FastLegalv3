@@ -133,19 +133,6 @@ def query_pinecone(query_embedding, filters):
 
 
 
-
-# st.set_page_config(
-#         page_title="Search Any Case",
-#         page_icon="🔍",
-#         layout="centered",
-#         initial_sidebar_state="expanded",
-#         menu_items={
-#             'Get Help': 'https://www.extremelycoolapp.com/help',
-#             'Report a bug': "https://www.extremelycoolapp.com/bug",
-#             'About': "# Find me at adrien@stepone.agency"
-#             }
-#     )
-
 st.title(":mag: Search by Situation")
 
 st.sidebar.title("Search by Situation")

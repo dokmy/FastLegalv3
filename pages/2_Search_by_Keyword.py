@@ -90,6 +90,46 @@ def get_summary(act):
     return response.response_gen
 
 
+def do_kw_search(cit,case_name, leg_name, parties,coram, representation, charge, all_of_these_words, any_of_these_words, exact_phrase, min_date, max_date):
+
+    link = f"https://www.hklii.hk/api/advancedsearch?searchType=advanced&text={all_of_these_words}&anyword={any_of_these_words}&title={case_name}&citation={cit}&captitle={leg_name}&coram={coram}&charge={charge}&representation={representation}&parties={parties}&phrase={exact_phrase}&min_date={min_date}&max_date={max_date}&dbs=2,4,5,7,9,11,13,15,17,19,21,23,25"
+
+
+    response = requests.get(link)
+
+    if response.status_code == 200:
+        data = response.json()
+        try:
+            result_count = data['count']
+        except Exception as e:
+            print(e)
+            pass
+
+        # results = data['results']
+        st.session_state.kw_search_results = data['results']
+        st.experimental_rerun()
+
+
+def search_wrapper():
+    cit = raw_cit.replace(" ", "+")
+    case_name = raw_case_name.replace(" ", "+")
+    leg_name = raw_leg_name.replace(" ", "+")
+    parties = raw_parties.replace(" ", "+")
+    coram = raw_coram.replace(" ", "+")
+    representation = raw_representation.replace(" ", "+")
+    charge = raw_charge.replace(" ", "+")
+    all_of_these_words = raw_all_of_these_words.replace(" ", "+")
+    any_of_these_words = raw_any_of_these_words.replace(" ", "+")
+    exact_phrase = raw_exact_phrase.replace(" ", "+")
+
+    raw_min_date = time_range[0]
+    raw_max_date = time_range[1]
+    formatted_raw_min_date_str = raw_min_date.strftime("%d/%m/%Y")
+    formatted_raw_max_date_str = raw_max_date.strftime("%d/%m/%Y")
+    min_date = formatted_raw_min_date_str.replace('/', '%2F')
+    max_date = formatted_raw_max_date_str.replace('/', '%2F')
+
+    do_kw_search(cit, case_name, leg_name, parties, coram, representation, charge, all_of_these_words, any_of_these_words, exact_phrase, min_date, max_date)
 
 
 
@@ -99,10 +139,12 @@ if "kw_search_results" not in st.session_state:
 if "summaries" not in st.session_state:
     st.session_state.summaries = {}
 
+if "searching" not in st.session_state:
+    st.session_state.searching = False
+
 st.title(":mag: Search by Keyword")
 # st.write(st.session_state)
 st.sidebar.title("Search by Keyword")
-
 
 
 with st.sidebar:
@@ -132,13 +174,12 @@ with st.sidebar:
         max_value=today_date,
         format="DD/MM/YYYY"
     )
+    raw_min_date = time_range[0]
+    raw_max_date = time_range[1]
+    formatted_raw_min_date_str = raw_min_date.strftime("%d/%m/%Y")
+    formatted_raw_max_date_str = raw_max_date.strftime("%d/%m/%Y")
 
-    
-
-    submit_kw_search_button = st.sidebar.button("Search", key="submit_kw_search_button")
-
-if submit_kw_search_button:
-
+    #Convert to search params
     cit = raw_cit.replace(" ", "+")
     case_name = raw_case_name.replace(" ", "+")
     leg_name = raw_leg_name.replace(" ", "+")
@@ -149,32 +190,14 @@ if submit_kw_search_button:
     all_of_these_words = raw_all_of_these_words.replace(" ", "+")
     any_of_these_words = raw_any_of_these_words.replace(" ", "+")
     exact_phrase = raw_exact_phrase.replace(" ", "+")
-
-    raw_min_date = time_range[0]
-    raw_max_date = time_range[1]
-
-    formatted_raw_min_date_str = raw_min_date.strftime("%d/%m/%Y")
-    formatted_raw_max_date_str = raw_max_date.strftime("%d/%m/%Y")
-
     min_date = formatted_raw_min_date_str.replace('/', '%2F')
     max_date = formatted_raw_max_date_str.replace('/', '%2F')
 
-    link = f"https://www.hklii.hk/api/advancedsearch?searchType=advanced&text={all_of_these_words}&anyword={any_of_these_words}&title={case_name}&citation={cit}&captitle={leg_name}&coram={coram}&charge={charge}&representation={representation}&parties={parties}&phrase={exact_phrase}&min_date={min_date}&max_date={max_date}&dbs=2,4,5,7,9,11,13,15,17,19,21,23,25"
+    submit_kw_search_button = st.sidebar.button("Search", key="submit_kw_search_button")
 
-    # st.write(link)
-
-    response = requests.get(link)
-
-    if response.status_code == 200:
-        data = response.json()
-        if 'count' in data:
-            result_count = data['count']
-        else:
-            pass
-
-        # results = data['results']
-        st.session_state.kw_search_results = data['results']
-        st.experimental_rerun()
+if submit_kw_search_button:
+    with st.spinner("Searching..."):
+        do_kw_search(cit,case_name, leg_name, parties,coram, representation, charge, all_of_these_words, any_of_these_words, exact_phrase, min_date, max_date)
 
 
 if st.session_state.kw_search_results != None:
