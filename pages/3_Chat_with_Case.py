@@ -142,7 +142,9 @@ def get_metadata(action_no):
                     case_db = data['db']
                     case_neutral_cit = data['neutral_cit']
 
-    return case_title, case_date, case_db, case_neutral_cit
+                    parts = data['raw_case_num'].split("_")
+                    case_link = f"https://www.hklii.hk/en/cases/{parts[1].lower()}/{parts[0]}/{parts[2]}"
+    return case_title, case_date, case_db, case_neutral_cit, case_link
 
 
 def main():
@@ -151,6 +153,9 @@ def main():
 
     
     all_act_nos = get_all_case_nos()
+
+    if 'show_iframe_cwc' not in st.session_state:
+        st.session_state['show_iframe_cwc'] = False
 
     
     if "messages" not in st.session_state.keys():
@@ -163,28 +168,22 @@ def main():
 
         
     if "case_to_chat" not in st.session_state:
-        st.session_state.case_to_chat = None
+        st.session_state.case_to_chat = all_act_nos[0]
 
 
-    if prompt := st.chat_input("Your question"):
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        st.session_state.streaming = True
+    case_title, case_date, case_db, case_neutral_cit, case_link = get_metadata(st.session_state['case_to_chat'])
 
-    
-
-    if st.session_state.streaming:
-        st.warning("Please wait for the current answer to complete.")
-        st.selectbox(
-        'Which case would you like to chat with?',
-        ("Please wait...",), disabled=True)
-        case_to_chat = st.session_state.case_to_chat
-    else:
+    with st.sidebar:
+        
         if st.session_state.case_to_chat != None:
             index = all_act_nos.index(st.session_state.case_to_chat)
         else:
             index = 0
-        
-        selected_case_act_no = st.selectbox('Which case would you like to chat with?',
+
+        if st.session_state.streaming:
+            st.selectbox('Which case would you like to chat with?', ("Please wait...",), disabled=True)
+        else:
+            selected_case_act_no = st.selectbox('Which case would you like to chat with?',
                                             (all_act_nos), 
                                             index=index)
         
@@ -193,16 +192,97 @@ def main():
             st.session_state.messages = [
                 {"role": "assistant", "content": f"Ask me a question about case {st.session_state.case_to_chat}."}
             ]
+        st.session_state['show_iframe_cwc'] = st.toggle('Show the case in chat window.', key=f"toggle_cwc", value=False)
+
+        st.info("Please re-toggle the button when you change the case number.")
+
+        html_content = f"""
+            <style>
+                .info-table {{
+                    width: 100%;
+                    border-collapse: collapse;
+                }}
+                .info-table th, .info-table td {{
+                    border: 1px solid #dddddd;
+                    text-align: left;
+                    padding: 8px;
+                }}
+                .info-table tr:nth-child{{
+                    background-color: rgba(255, 18, 32, 0.3);
+                }}
+                .info-table th {{
+                    background-color: rgba(255, 18, 32, 0.3); /* Transparent orange background */
+                    color: black;
+                    font-weight: bold;
+                }}
+            </style>
+
+            <table class="info-table">
+                <tr>
+                    <th>Date:</th>
+                    <td>{case_date}</td>
+                </tr>
+                <tr>
+                    <th>Action No.:</th>
+                    <td>{st.session_state["case_to_chat"]}</td>
+                </tr>
+                <tr>
+                    <th>Neutral Cit.:</th>
+                    <td>{case_neutral_cit}</td>
+                </tr>
+                <tr>
+                    <th>Title:</th>
+                    <td>{case_title}</td>
+                </tr>
+                <tr>
+                    <th>Court:</th>
+                    <td>{case_db}</td>
+                </tr>
+            </table>
+        """
+        st.markdown(html_content, unsafe_allow_html=True)
         
+        # st.write(st.session_state['show_iframe_cwc'])
+        # st.write(st.session_state['case_to_chat'])
+
+    
+    if prompt := st.chat_input("Your question"):
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        st.session_state.streaming = True
+
+    # if st.session_state.streaming:
+    #     st.warning("Please wait for the current answer to complete.")
+    #     st.selectbox(
+    #     'Which case would you like to chat with?',
+    #     ("Please wait...",), disabled=True)
+    #     case_to_chat = st.session_state.case_to_chat
+    # else:
+    #     if st.session_state.case_to_chat != None:
+    #         index = all_act_nos.index(st.session_state.case_to_chat)
+    #     else:
+    #         index = 0
+        
+        # st.session_state.selected_case_to_chat = st.selectbox('Which case would you like to chat with?',
+        #                                     (all_act_nos), 
+        #                                     index=index)
+        
+        # if selected_case_act_no != st.session_state.case_to_chat:
+        #     st.session_state.case_to_chat = selected_case_act_no
+        #     st.session_state.messages = [
+        #         {"role": "assistant", "content": f"Ask me a question about case {st.session_state.case_to_chat}."}
+        #     ]
 
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.write(message["content"])
+    
+    if st.session_state.show_iframe_cwc:
+        st.components.v1.iframe(src=case_link, width=None, height=500, scrolling=True)
 
     if st.session_state.messages[-1]["role"] != "assistant":
         with st.chat_message("assistant"):
             with st.spinner("Generating answer..."):
-                response = query_case(case_to_chat, prompt)
+                response = query_case(st.session_state.case_to_chat, prompt)
                 ans_box = st.empty()
                 stream = []
                 for res in response:
@@ -212,17 +292,12 @@ def main():
                 message = {"role": "assistant", "content": answer}
                 st.session_state.messages.append(message)
                 st.session_state.streaming = False
+                
                 st.experimental_rerun()
+                
     
     
-    with st.sidebar:
-        case_title, case_date, case_db, case_neutral_cit = get_metadata(st.session_state['case_to_chat'])
-        st.markdown("**Selected Case:**")
-        st.markdown(f"Date: {case_date}")
-        st.markdown(f"Action No.: {st.session_state['case_to_chat']}")
-        st.markdown(f"Neutral Cit.: {case_neutral_cit}")
-        st.markdown(f"Title: {case_title}")
-        st.markdown(f"Court: {case_db}")
-        st.write(st.session_state['case_to_chat'])
+    
+
 if __name__ == "__main__":
     main()
