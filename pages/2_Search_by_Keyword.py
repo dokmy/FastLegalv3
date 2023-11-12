@@ -15,6 +15,7 @@ import streamlit as st
 import json
 import requests
 import datetime
+import streamlit.components.v1 as components
 
 load_dotenv("./.env")
 
@@ -132,6 +133,18 @@ def search_wrapper():
     do_kw_search(cit, case_name, leg_name, parties, coram, representation, charge, all_of_these_words, any_of_these_words, exact_phrase, min_date, max_date)
 
 
+# st.set_page_config(
+#     page_title="Search with keyword",
+#     page_icon="🔍",
+#     layout="wide",
+#     initial_sidebar_state="expanded",
+#     menu_items={
+#         'Get Help': 'https://www.extremelycoolapp.com/help',
+#         'Report a bug': "https://www.extremelycoolapp.com/bug",
+#         'About': "# This is a header. This is an *extremely* cool app!"
+#     }
+# )
+
 
 if "kw_search_results" not in st.session_state:
     st.session_state.kw_search_results = None
@@ -141,6 +154,9 @@ if "summaries" not in st.session_state:
 
 if "searching" not in st.session_state:
     st.session_state.searching = False
+
+# if "case_to_chat" not in st.session_state:
+#     st.session_state.case_to_chat = None
 
 st.title(":mag: Search by Keyword")
 # st.write(st.session_state)
@@ -223,11 +239,15 @@ if st.session_state.kw_search_results != None:
                         f'<li>Court: {result["db"]}</li>'                        
                         f'<li>Neutral Citation: {result["neutral"]}</li>'
                         f'<li>Date: {formatted_date}</li>'  
-                        f'<li><a href="{case_link}" target="_blank">Click here to the case</a></li>'
-                        '</ul><br>',
+                        # f'<li><a href="{case_link}" target="_blank">Click here to the case</a></li>'
+                        # '</ul><br>',
                         # f'{answer}</div>', 
-                        unsafe_allow_html=True
+                        ,unsafe_allow_html=True
                                     )
+            show_iframe = st.toggle('Show the case. Please allow several seconds to load.', key=f"toggle_{i}")
+            if show_iframe:
+                st.components.v1.iframe(src=case_link, width=None, height=500, scrolling=True)
+
             if act in st.session_state.summaries.keys():
                 case_summary = st.session_state.summaries[str(act)]
                 st.write("Case Summary: ")
