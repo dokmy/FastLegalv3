@@ -203,7 +203,7 @@ with st.sidebar:
     None)
 
     filters = options1 + options2 + options3 + options4 + options5 + options6 + options7 + options8 + options9 + options10
-    st.write(filters)
+    # st.write(filters)
     submit_button = st.sidebar.button("Search")
     
 
