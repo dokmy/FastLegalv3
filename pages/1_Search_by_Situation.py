@@ -41,7 +41,7 @@ if index_name not in pinecone.list_indexes():
     )
     print("Pinecone canvas does not exist. Just created and connected.")
 pinecone_index = pinecone.Index(index_name)
-print("Pinecone canvas already exists. Now we're connected.")
+print("1- Pinecone canvas already exists. Now we're connected.")
 
 
 def build_context(model_name):
@@ -114,7 +114,7 @@ def query_pinecone(query_embedding, filters):
         )
         print("Pinecone canvas does not exist. Just created and connected.")
     pinecone_index = pinecone.Index(index_name)
-    print("Pinecone canvas already exists. Now we're connected.")
+    print("1b - Pinecone canvas already exists. Now we're connected.")
 
     results = pinecone_index.query(
         vector=query_embedding,

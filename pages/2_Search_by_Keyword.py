@@ -43,7 +43,7 @@ if index_name not in pinecone.list_indexes():
     )
     print("Pinecone canvas does not exist. Just created and connected.")
 pinecone_index = pinecone.Index(index_name)
-print("Pinecone canvas already exists. Now we're connected.")
+print("2- Pinecone canvas already exists. Now we're connected.")
 
 
 def build_context(model_name):
@@ -93,9 +93,10 @@ def get_summary(act):
 
 def do_kw_search(cit,case_name, leg_name, parties,coram, representation, charge, all_of_these_words, any_of_these_words, exact_phrase, min_date, max_date):
 
+
     link = f"https://www.hklii.hk/api/advancedsearch?searchType=advanced&text={all_of_these_words}&anyword={any_of_these_words}&title={case_name}&citation={cit}&captitle={leg_name}&coram={coram}&charge={charge}&representation={representation}&parties={parties}&phrase={exact_phrase}&min_date={min_date}&max_date={max_date}&dbs=2,4,5,7,9,11,13,15,17,19,21,23,25"
 
-
+    print(link)
     response = requests.get(link)
 
     if response.status_code == 200:
@@ -112,16 +113,16 @@ def do_kw_search(cit,case_name, leg_name, parties,coram, representation, charge,
 
 
 def search_wrapper():
-    cit = raw_cit.replace(" ", "+")
-    case_name = raw_case_name.replace(" ", "+")
-    leg_name = raw_leg_name.replace(" ", "+")
-    parties = raw_parties.replace(" ", "+")
-    coram = raw_coram.replace(" ", "+")
-    representation = raw_representation.replace(" ", "+")
-    charge = raw_charge.replace(" ", "+")
-    all_of_these_words = raw_all_of_these_words.replace(" ", "+")
-    any_of_these_words = raw_any_of_these_words.replace(" ", "+")
-    exact_phrase = raw_exact_phrase.replace(" ", "+")
+    cit = raw_cit.replace(" ", "+").replace('"','%22')
+    case_name = raw_case_name.replace(" ", "+").replace('"','%22')
+    leg_name = raw_leg_name.replace(" ", "+").replace('"','%22')
+    parties = raw_parties.replace(" ", "+").replace('"','%22')
+    coram = raw_coram.replace(" ", "+").replace('"','%22')
+    representation = raw_representation.replace(" ", "+").replace('"','%22')
+    charge = raw_charge.replace(" ", "+").replace('"','%22')
+    all_of_these_words = raw_all_of_these_words.replace(" ", "+").replace('"','%22')
+    any_of_these_words = raw_any_of_these_words.replace(" ", "+").replace('"','%22')
+    exact_phrase = raw_exact_phrase.replace(" ", "+").replace('"','%22')
 
     raw_min_date = time_range[0]
     raw_max_date = time_range[1]
@@ -202,16 +203,16 @@ with st.sidebar:
     formatted_raw_max_date_str = raw_max_date.strftime("%d/%m/%Y")
 
     #Convert to search params
-    cit = raw_cit.replace(" ", "+")
-    case_name = raw_case_name.replace(" ", "+")
-    leg_name = raw_leg_name.replace(" ", "+")
-    parties = raw_parties.replace(" ", "+")
-    coram = raw_coram.replace(" ", "+")
-    representation = raw_representation.replace(" ", "+")
-    charge = raw_charge.replace(" ", "+")
-    all_of_these_words = raw_all_of_these_words.replace(" ", "+")
-    any_of_these_words = raw_any_of_these_words.replace(" ", "+")
-    exact_phrase = raw_exact_phrase.replace(" ", "+")
+    cit = raw_cit.replace(" ", "+").replace('"','%22')
+    case_name = raw_case_name.replace(" ", "+").replace('"','%22')
+    leg_name = raw_leg_name.replace(" ", "+").replace('"','%22')
+    parties = raw_parties.replace(" ", "+").replace('"','%22')
+    coram = raw_coram.replace(" ", "+").replace('"','%22')
+    representation = raw_representation.replace(" ", "+").replace('"','%22')
+    charge = raw_charge.replace(" ", "+").replace('"','%22')
+    all_of_these_words = raw_all_of_these_words.replace(" ", "+").replace('"','%22')
+    any_of_these_words = raw_any_of_these_words.replace(" ", "+").replace('"','%22')
+    exact_phrase = raw_exact_phrase.replace(" ", "+").replace('"','%22')
     min_date = formatted_raw_min_date_str.replace('/', '%2F')
     max_date = formatted_raw_max_date_str.replace('/', '%2F')
 

@@ -68,7 +68,7 @@ def build_case_query_engine(action_no):
         )
         print("Pinecone canvas does not exist. Just created and connected.")
     pinecone_index = pinecone.Index(index_name)
-    print("Pinecone canvas already exists. Now we're connected.")
+    print("3- Pinecone canvas already exists. Now we're connected.")
 
     vector_store = PineconeVectorStore(pinecone_index=pinecone_index)
 
