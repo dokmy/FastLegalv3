@@ -234,7 +234,7 @@ if submit_button:
                 raw_date = datetime.fromisoformat(case["date"])
                 formatted_date = raw_date.strftime("%d %b, %Y")
                 year, court, case_number = case['raw_case_num'].split("_")
-                link = f"https://www.hklii.hk/en/cases/{court}/{year}/{case_number}"
+                link = f"https://www.hklii.hk/en/cases/{court.lower()}/{year}/{case_number}"
                 ans_box = st.empty()
 
                 # stream = []
