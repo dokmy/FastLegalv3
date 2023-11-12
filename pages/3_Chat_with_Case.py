@@ -147,6 +147,25 @@ def get_metadata(action_no):
     return case_title, case_date, case_db, case_neutral_cit, case_link
 
 
+def add_logo():
+    st.markdown(
+        """
+        <style>
+            [data-testid="stSidebarNav"] {
+                background-image: url('https://i.imgur.com/XlV61vK.png');
+                background-repeat: no-repeat;
+                padding-top: 30px;
+                background-position: 20px 50px;
+                background-size: 300px 50px;
+            }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+add_logo()
+
+
 def main():
 
     st.title(":robot_face: Chat with Any Case")

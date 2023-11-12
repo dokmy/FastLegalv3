@@ -132,12 +132,31 @@ def query_pinecone(query_embedding, filters):
     return list_of_case_metadata
 
 
+def add_logo():
+    st.markdown(
+        """
+        <style>
+            [data-testid="stSidebarNav"] {
+                background-image: url('https://i.imgur.com/XlV61vK.png');
+                background-repeat: no-repeat;
+                padding-top: 30px;
+                background-position: 20px 50px;
+                background-size: 300px 50px;
+            }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+add_logo()
+
 
 st.title(":mag: Search by Situation")
 
 st.sidebar.title("Search by Situation")
 
 with st.sidebar:
+    
     st.markdown("**Describe your client's situation in the following box.**")
     user_input = st.sidebar.text_area("Be as specific as possible:", placeholder="E.g. My client slips and falls in a shopping mall while working...")
     st.markdown("**Select types of cases to search:**")

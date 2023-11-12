@@ -133,17 +133,23 @@ def search_wrapper():
     do_kw_search(cit, case_name, leg_name, parties, coram, representation, charge, all_of_these_words, any_of_these_words, exact_phrase, min_date, max_date)
 
 
-# st.set_page_config(
-#     page_title="Search with keyword",
-#     page_icon="🔍",
-#     layout="wide",
-#     initial_sidebar_state="expanded",
-#     menu_items={
-#         'Get Help': 'https://www.extremelycoolapp.com/help',
-#         'Report a bug': "https://www.extremelycoolapp.com/bug",
-#         'About': "# This is a header. This is an *extremely* cool app!"
-#     }
-# )
+def add_logo():
+    st.markdown(
+        """
+        <style>
+            [data-testid="stSidebarNav"] {
+                background-image: url('https://i.imgur.com/XlV61vK.png');
+                background-repeat: no-repeat;
+                padding-top: 30px;
+                background-position: 20px 50px;
+                background-size: 300px 50px;
+            }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+add_logo()
 
 
 if "kw_search_results" not in st.session_state:
