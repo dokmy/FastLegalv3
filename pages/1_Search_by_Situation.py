@@ -15,17 +15,31 @@ import streamlit as st
 import json
 from datetime import datetime
 
-load_dotenv("./.env")
+# load_dotenv("./.env")
 
-try:
-    openai.api_key = os.getenv("OPENAI_API_KEY")
-    pinecone_api_key = os.getenv("PINECONE_API_KEY")
-    pinecone_environment = os.getenv("PINECONE_ENVIRONMENT")
+def load_api_keys():
+    try:
+        # Check if we are running on Streamlit Cloud
+        if 'OPENAI_API_KEY' in st.secrets:
+            openai.api_key = st.secrets["OPENAI_API_KEY"]
+            pinecone_api_key = st.secrets["PINECONE_API_KEY"]
+            pinecone_environment = st.secrets["PINECONE_ENVIRONMENT"]
+        else:
+            raise KeyError("Running in local environment")
+    except (FileNotFoundError, KeyError):
+        # Load from .env file for local development
+        load_dotenv("./.env")
+        openai.api_key = os.getenv("OPENAI_API_KEY")
+        pinecone_api_key = os.getenv("PINECONE_API_KEY")
+        pinecone_environment = os.getenv("PINECONE_ENVIRONMENT")
+    
+    st.write(openai.api_key, pinecone_api_key, pinecone_environment)
+    return openai.api_key, pinecone_api_key, pinecone_environment
+    
 
-except:
-    openai.api_key = st.secrets["OPENAI_API_KEY"]
-    pinecone_api_key = st.secrets["PINECONE_API_KEY"]
-    pinecone_environment = st.secrets["PINECONE_ENVIRONMENT"]
+# Call the function to load API keys
+openai.api_key, pinecone_api_key, pinecone_environment = load_api_keys()
+    
 
 pinecone.init(
         api_key=pinecone_api_key,
@@ -216,6 +230,7 @@ if "search_results" not in st.session_state:
 
 
 if submit_button:
+
     with st.spinner('Generating answers...'):
         
         st.markdown("Searching for cases")

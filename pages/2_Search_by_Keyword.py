@@ -20,14 +20,15 @@ import streamlit.components.v1 as components
 load_dotenv("./.env")
 
 try:
-    openai.api_key = os.getenv("OPENAI_API_KEY")
-    pinecone_api_key = os.getenv("PINECONE_API_KEY")
-    pinecone_environment = os.getenv("PINECONE_ENVIRONMENT")
-
-except:
     openai.api_key = st.secrets["OPENAI_API_KEY"]
     pinecone_api_key = st.secrets["PINECONE_API_KEY"]
     pinecone_environment = st.secrets["PINECONE_ENVIRONMENT"]
+    
+
+except:
+    openai.api_key = os.getenv("OPENAI_API_KEY")
+    pinecone_api_key = os.getenv("PINECONE_API_KEY")
+    pinecone_environment = os.getenv("PINECONE_ENVIRONMENT")
 
 pinecone.init(
         api_key=pinecone_api_key,
