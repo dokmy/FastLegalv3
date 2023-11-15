@@ -33,8 +33,6 @@ st.set_page_config(
 
 add_logo()
 
-# st.sidebar.image("assets/FastLegal Logo - transparent_rec.png", width=200)
-# st.image("assets/FastLegal Logo - transparent_rec.png", width=300)
 st.write("# Welcome to FastLegal! 👋")
 
 st.sidebar.success("Select a search tool above.")

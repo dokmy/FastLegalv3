@@ -132,6 +132,7 @@ def query_pinecone(query_embedding, filters):
     return list_of_case_metadata
 
 
+
 def add_logo():
     st.markdown(
         """
@@ -149,6 +150,9 @@ def add_logo():
     )
 
 add_logo()
+
+
+
 
 
 st.title(":mag: Search by Situation")
@@ -228,7 +232,7 @@ if submit_button:
         i = 0
         for case in st.session_state.search_results:
             i = i+1
-            with st.expander(f"Case {i}: {case['cases_act']}"):
+            with st.expander(f"Case {i}: {case['cases_act']}",expanded=True):
                 # button = st.button("Chat with this case!", key=f"{case_act_no}")
                 chat_link = f'[Chat with this case!](http://localhost:8999/?case_act_no=changelater)'
                 raw_date = datetime.fromisoformat(case["date"])
@@ -242,19 +246,21 @@ if submit_button:
                     stream = st.session_state[f"{case['cases_act']}"]
                 else:
                     stream = []
-
-                for res in query_case(case['cases_act'], query):
-                    stream.append(res)
-                    answer = "".join(stream).strip()
-                    ans_box.markdown(
-                        f'<h3>{case["cases_title"]}</h3>'
-                        '<ul>'
-                        f'<li>Date: {formatted_date}</li>'                        
-                        f'<li>Neutral Citation: {case["neutral_cit"]}</li>'
-                        f'<li><a href="{link}" target="_blank">Click here to the case</a></li>'
-                        '</ul><br>'
-                        f'{answer}</div>', 
-                        unsafe_allow_html=True
-                                    )
-                    st.session_state[f"{case['cases_act']}"] = stream
+                try:
+                    for res in query_case(case['cases_act'], query):
+                        stream.append(res)
+                        answer = "".join(stream).strip()
+                        ans_box.markdown(
+                            f'<h3>{case["cases_title"]}</h3>'
+                            '<ul>'
+                            f'<li>Date: {formatted_date}</li>'                        
+                            f'<li>Neutral Citation: {case["neutral_cit"]}</li>'
+                            f'<li><a href="{link}" target="_blank">Click here to the case</a></li>'
+                            '</ul><br>'
+                            f'{answer}</div>', 
+                            unsafe_allow_html=True
+                                        )
+                        st.session_state[f"{case['cases_act']}"] = stream
+                except:
+                    pass
     
