@@ -259,21 +259,20 @@ if submit_button:
                     stream = st.session_state[f"{case['cases_act']}"]
                 else:
                     stream = []
-                try:
-                    for res in query_case(case['cases_act'], query):
-                        stream.append(res)
-                        answer = "".join(stream).strip()
-                        ans_box.markdown(
-                            f'<h3>{case["cases_title"]}</h3>'
-                            '<ul>'
-                            f'<li>Date: {formatted_date}</li>'                        
-                            f'<li>Neutral Citation: {case["neutral_cit"]}</li>'
-                            f'<li><a href="{link}" target="_blank">Click here to the case</a></li>'
-                            '</ul><br>'
-                            f'{answer}</div>', 
-                            unsafe_allow_html=True
-                                        )
-                        st.session_state[f"{case['cases_act']}"] = stream
-                except:
-                    pass
+
+                for res in query_case(case['cases_act'], query):
+                    stream.append(res)
+                    answer = "".join(stream).strip()
+                    ans_box.markdown(
+                        f'<h3>{case["cases_title"]}</h3>'
+                        '<ul>'
+                        f'<li>Date: {formatted_date}</li>'                        
+                        f'<li>Neutral Citation: {case["neutral_cit"]}</li>'
+                        f'<li><a href="{link}" target="_blank">Click here to the case</a></li>'
+                        '</ul><br>'
+                        f'{answer}</div>', 
+                        unsafe_allow_html=True
+                                    )
+                    st.session_state[f"{case['cases_act']}"] = stream
+
     
