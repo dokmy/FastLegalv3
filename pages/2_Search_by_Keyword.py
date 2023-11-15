@@ -20,12 +20,16 @@ import streamlit.components.v1 as components
 load_dotenv("./.env")
 
 try:
-    openai.api_key = st.secrets["OPENAI_API_KEY"]
-    pinecone_api_key = st.secrets["PINECONE_API_KEY"]
-    pinecone_environment = st.secrets["PINECONE_ENVIRONMENT"]
-    
-
-except:
+    # Check if we are running on Streamlit Cloud
+    if 'OPENAI_API_KEY' in st.secrets:
+        openai.api_key = st.secrets["OPENAI_API_KEY"]
+        pinecone_api_key = st.secrets["PINECONE_API_KEY"]
+        pinecone_environment = st.secrets["PINECONE_ENVIRONMENT"]
+    else:
+        raise KeyError("Running in local environment")
+except (FileNotFoundError, KeyError):
+    # Load from .env file for local development
+    load_dotenv("./.env")
     openai.api_key = os.getenv("OPENAI_API_KEY")
     pinecone_api_key = os.getenv("PINECONE_API_KEY")
     pinecone_environment = os.getenv("PINECONE_ENVIRONMENT")
