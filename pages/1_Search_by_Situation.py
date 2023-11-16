@@ -244,7 +244,7 @@ if submit_button:
         i = 0
         for case in st.session_state.search_results:
             i = i+1
-            with st.expander(f"Case {i}: {case['cases_act']}"):
+            with st.expander(f"Case {i}: {case['cases_act']}", expanded=True):
                 # button = st.button("Chat with this case!", key=f"{case_act_no}")
                 chat_link = f'[Chat with this case!](http://localhost:8999/?case_act_no=changelater)'
                 raw_date = datetime.fromisoformat(case["date"])
