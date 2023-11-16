@@ -274,6 +274,6 @@ if submit_button:
                         f'{answer}</div>', 
                         unsafe_allow_html=True
                                     )
-                st.session_state[f"{case['cases_act']}"] = stream
+                    st.session_state[f"{case['cases_act']}"] = stream
 
     
