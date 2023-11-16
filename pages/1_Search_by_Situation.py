@@ -20,12 +20,10 @@ from datetime import datetime
 
 try:
     # Check if we are running on Streamlit Cloud
-    if 'OPENAI_API_KEY' in st.secrets:
-        openai.api_key = st.secrets["OPENAI_API_KEY"]
-        pinecone_api_key = st.secrets["PINECONE_API_KEY"]
-        pinecone_environment = st.secrets["PINECONE_ENVIRONMENT"]
-    else:
-        raise KeyError("Running in local environment")
+    openai.api_key = st.secrets["OPENAI_API_KEY"]
+    pinecone_api_key = st.secrets["PINECONE_API_KEY"]
+    pinecone_environment = st.secrets["PINECONE_ENVIRONMENT"]
+
 except (FileNotFoundError, KeyError):
     # Load from .env file for local development
     load_dotenv("./.env")
