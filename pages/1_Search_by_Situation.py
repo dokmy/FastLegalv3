@@ -34,7 +34,7 @@ except (FileNotFoundError, KeyError):
     pinecone_environment = os.getenv("PINECONE_ENVIRONMENT")
 
 
-    
+# st.write(openai.api_key)
 
 
     
@@ -98,11 +98,12 @@ def build_case_query_engine(case_act_no):
     return query_engine
 
 
-@st.cache_resource
+# @st.cache_resource
 def query_case(case_act_no, query):
     query_engine = build_case_query_engine(case_act_no)
     response = query_engine.query(query)
-
+    for text in response.response_gen:
+        print(text)
     return response.response_gen
 
 
@@ -245,7 +246,7 @@ if submit_button:
         i = 0
         for case in st.session_state.search_results:
             i = i+1
-            with st.expander(f"Case {i}: {case['cases_act']}"):
+            with st.expander(f"Case {i}: {case['cases_act']}", expanded=True):
                 # button = st.button("Chat with this case!", key=f"{case_act_no}")
                 chat_link = f'[Chat with this case!](http://localhost:8999/?case_act_no=changelater)'
                 raw_date = datetime.fromisoformat(case["date"])
@@ -273,6 +274,6 @@ if submit_button:
                         f'{answer}</div>', 
                         unsafe_allow_html=True
                                     )
-                    st.session_state[f"{case['cases_act']}"] = stream
+                st.session_state[f"{case['cases_act']}"] = stream
 
     
