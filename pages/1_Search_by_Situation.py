@@ -100,8 +100,8 @@ def build_case_query_engine(case_act_no):
 def query_case(case_act_no, query):
     query_engine = build_case_query_engine(case_act_no)
     response = query_engine.query(query)
-    for text in response.response_gen:
-        print(text)
+    # for text in response.response_gen:
+    #     print(text)
     return response.response_gen
 
 
