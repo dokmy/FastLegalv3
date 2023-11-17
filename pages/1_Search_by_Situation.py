@@ -14,6 +14,7 @@ from llama_index.vector_stores.types import ExactMatchFilter, MetadataFilters
 import streamlit as st
 import json
 from datetime import datetime
+import threading
 
 # load_dotenv("./.env")
 
@@ -138,6 +139,32 @@ def query_pinecone(query_embedding, filters):
     return list_of_case_metadata
 
 
+def process_tab(case, query, ans_box, stream_key):
+    chat_link = f'[Chat with this case!](http://localhost:8999/?case_act_no=changelater)'
+    raw_date = datetime.fromisoformat(case["date"])
+    formatted_date = raw_date.strftime("%d %b, %Y")
+    year, court, case_number = case['raw_case_num'].split("_")
+    link = f"https://www.hklii.hk/en/cases/{court.lower()}/{year}/{case_number}"
+
+    stream = st.session_state.get(stream_key, [])
+
+    for res in query_case(case['cases_act'], query):
+        stream.append(res)
+        answer = "".join(stream).strip()
+        ans_box.markdown(
+            f'<h3>{case["cases_title"]}</h3>'
+            '<ul>'
+            f'<li>Date: {formatted_date}</li>'
+            f'<li>Action no.: {case["cases_act"]}</li>'
+            f'<li>Neutral Citation: {case["neutral_cit"]}</li>'
+            f'<li><a href="{link}" target="_blank">Click here to the case</a></li>'
+            '</ul><br>'
+            f'{answer}</div>',
+            unsafe_allow_html=True
+        )
+    st.session_state[stream_key] = stream
+
+
 
 def add_logo():
     st.markdown(
@@ -237,197 +264,54 @@ if submit_button:
         tab_titles = ["Case 1", "Case 2", "Case 3", "Case 4", "Case 5"]
         tabs = st.tabs(tab_titles)
 
+        threads = []
+
         for i, tab in enumerate(tabs):
             with tab:
                 with st.spinner('Generating answers...'):
-                    # Access the case using index 'i'
                     case = st.session_state.search_results[i]
-                    chat_link = f'[Chat with this case!](http://localhost:8999/?case_act_no=changelater)'
-                    raw_date = datetime.fromisoformat(case["date"])
-                    formatted_date = raw_date.strftime("%d %b, %Y")
-                    year, court, case_number = case['raw_case_num'].split("_")
-                    link = f"https://www.hklii.hk/en/cases/{court.lower()}/{year}/{case_number}"
                     ans_box = st.empty()
-
-                    # Stream processing
                     stream_key = f"{case['cases_act']}"
-                    stream = st.session_state.get(stream_key, [])
 
-                    for res in query_case(case['cases_act'], query):
-                        stream.append(res)
-                        answer = "".join(stream).strip()
-                        ans_box.markdown(
-                            f'<h3>{case["cases_title"]}</h3>'
-                            '<ul>'
-                            f'<li>Date: {formatted_date}</li>'
-                            f'<li>Action no.: {case["cases_act"]}</li>'
-                            f'<li>Neutral Citation: {case["neutral_cit"]}</li>'
-                            f'<li><a href="{link}" target="_blank">Click here to the case</a></li>'
-                            '</ul><br>'
-                            f'{answer}</div>',
-                            unsafe_allow_html=True
-                        )
-                    st.session_state[stream_key] = stream
+                    # Create a new thread for each tab's content processing
+                    thread = threading.Thread(target=process_tab, args=(case, query, ans_box, stream_key))
+                    threads.append(thread)
+                    thread.start()
+
+        # Wait for all threads to complete
+        for thread in threads:
+            thread.join()
+
+        # for i, tab in enumerate(tabs):
+        #     with tab:
+        #         with st.spinner('Generating answers...'):
+        #             # Access the case using index 'i'
+        #             case = st.session_state.search_results[i]
+        #             chat_link = f'[Chat with this case!](http://localhost:8999/?case_act_no=changelater)'
+        #             raw_date = datetime.fromisoformat(case["date"])
+        #             formatted_date = raw_date.strftime("%d %b, %Y")
+        #             year, court, case_number = case['raw_case_num'].split("_")
+        #             link = f"https://www.hklii.hk/en/cases/{court.lower()}/{year}/{case_number}"
+        #             ans_box = st.empty()
+
+        #             # Stream processing
+        #             stream_key = f"{case['cases_act']}"
+        #             stream = st.session_state.get(stream_key, [])
+
+        #             for res in query_case(case['cases_act'], query):
+        #                 stream.append(res)
+        #                 answer = "".join(stream).strip()
+        #                 ans_box.markdown(
+        #                     f'<h3>{case["cases_title"]}</h3>'
+        #                     '<ul>'
+        #                     f'<li>Date: {formatted_date}</li>'
+        #                     f'<li>Action no.: {case["cases_act"]}</li>'
+        #                     f'<li>Neutral Citation: {case["neutral_cit"]}</li>'
+        #                     f'<li><a href="{link}" target="_blank">Click here to the case</a></li>'
+        #                     '</ul><br>'
+        #                     f'{answer}</div>',
+        #                     unsafe_allow_html=True
+        #                 )
+        #             st.session_state[stream_key] = stream
         
-        # tab1, tab2, tab3, tab4, tab5 = st.tabs(["Case 1","Case 2","Case 3","Case 4","Case 5"])
-
-        # with tab1:
-        #     with st.spinner('Generating answers...'):
-        #         case = st.session_state.search_results[0]
-        #         chat_link = f'[Chat with this case!](http://localhost:8999/?case_act_no=changelater)'
-        #         raw_date = datetime.fromisoformat(case["date"])
-        #         formatted_date = raw_date.strftime("%d %b, %Y")
-        #         action_no = case['cases_act']
-        #         year, court, case_number = case['raw_case_num'].split("_")
-        #         link = f"https://www.hklii.hk/en/cases/{court.lower()}/{year}/{case_number}"
-        #         ans_box = st.empty()
-
-        #         # stream = []
-        #         if case["cases_act"] in st.session_state:
-        #             stream = st.session_state[f"{case['cases_act']}"]
-        #         else:
-        #             stream = []
-
-        #         for res in query_case(case['cases_act'], query):
-        #             stream.append(res)
-        #             answer = "".join(stream).strip()
-        #             ans_box.markdown(
-        #                 f'<h3>{case["cases_title"]}</h3>'
-        #                 '<ul>'
-        #                 f'<li>Date: {formatted_date}</li>'     
-        #                 f'<li>Action no.: {action_no}</li>'                    
-        #                 f'<li>Neutral Citation: {case["neutral_cit"]}</li>'
-        #                 f'<li><a href="{link}" target="_blank">Click here to the case</a></li>'
-        #                 '</ul><br>'
-        #                 f'{answer}</div>', 
-        #                 unsafe_allow_html=True
-        #                             )
-        #         st.session_state[f"{case['cases_act']}"] = stream
-
-
-        # with tab2:
-        #     with st.spinner('Generating answers...'):
-        #         case = st.session_state.search_results[1]
-        #         chat_link = f'[Chat with this case!](http://localhost:8999/?case_act_no=changelater)'
-        #         raw_date = datetime.fromisoformat(case["date"])
-        #         formatted_date = raw_date.strftime("%d %b, %Y")
-        #         year, court, case_number = case['raw_case_num'].split("_")
-        #         link = f"https://www.hklii.hk/en/cases/{court.lower()}/{year}/{case_number}"
-        #         ans_box = st.empty()
-
-        #         # stream = []
-        #         if case["cases_act"] in st.session_state:
-        #             stream = st.session_state[f"{case['cases_act']}"]
-        #         else:
-        #             stream = []
-
-        #         for res in query_case(case['cases_act'], query):
-        #             stream.append(res)
-        #             answer = "".join(stream).strip()
-        #             ans_box.markdown(
-        #                 f'<h3>{case["cases_title"]}</h3>'
-        #                 '<ul>'
-        #                 f'<li>Date: {formatted_date}</li>'                        
-        #                 f'<li>Neutral Citation: {case["neutral_cit"]}</li>'
-        #                 f'<li><a href="{link}" target="_blank">Click here to the case</a></li>'
-        #                 '</ul><br>'
-        #                 f'{answer}</div>', 
-        #                 unsafe_allow_html=True
-        #                             )
-        #         st.session_state[f"{case['cases_act']}"] = stream
-
-        # with tab3:
-        #     with st.spinner('Generating answers...'):
-        #         case = st.session_state.search_results[2]
-        #         chat_link = f'[Chat with this case!](http://localhost:8999/?case_act_no=changelater)'
-        #         raw_date = datetime.fromisoformat(case["date"])
-        #         formatted_date = raw_date.strftime("%d %b, %Y")
-        #         year, court, case_number = case['raw_case_num'].split("_")
-        #         link = f"https://www.hklii.hk/en/cases/{court.lower()}/{year}/{case_number}"
-        #         ans_box = st.empty()
-
-        #         # stream = []
-        #         if case["cases_act"] in st.session_state:
-        #             stream = st.session_state[f"{case['cases_act']}"]
-        #         else:
-        #             stream = []
-
-        #         for res in query_case(case['cases_act'], query):
-        #             stream.append(res)
-        #             answer = "".join(stream).strip()
-        #             ans_box.markdown(
-        #                 f'<h3>{case["cases_title"]}</h3>'
-        #                 '<ul>'
-        #                 f'<li>Date: {formatted_date}</li>'                        
-        #                 f'<li>Neutral Citation: {case["neutral_cit"]}</li>'
-        #                 f'<li><a href="{link}" target="_blank">Click here to the case</a></li>'
-        #                 '</ul><br>'
-        #                 f'{answer}</div>', 
-        #                 unsafe_allow_html=True
-        #                             )
-        #         st.session_state[f"{case['cases_act']}"] = stream
-
-        # with tab4:
-        #     with st.spinner('Generating answers...'):
-        #         case = st.session_state.search_results[3]
-        #         chat_link = f'[Chat with this case!](http://localhost:8999/?case_act_no=changelater)'
-        #         raw_date = datetime.fromisoformat(case["date"])
-        #         formatted_date = raw_date.strftime("%d %b, %Y")
-        #         year, court, case_number = case['raw_case_num'].split("_")
-        #         link = f"https://www.hklii.hk/en/cases/{court.lower()}/{year}/{case_number}"
-        #         ans_box = st.empty()
-
-        #         # stream = []
-        #         if case["cases_act"] in st.session_state:
-        #             stream = st.session_state[f"{case['cases_act']}"]
-        #         else:
-        #             stream = []
-
-        #         for res in query_case(case['cases_act'], query):
-        #             stream.append(res)
-        #             answer = "".join(stream).strip()
-        #             ans_box.markdown(
-        #                 f'<h3>{case["cases_title"]}</h3>'
-        #                 '<ul>'
-        #                 f'<li>Date: {formatted_date}</li>'                        
-        #                 f'<li>Neutral Citation: {case["neutral_cit"]}</li>'
-        #                 f'<li><a href="{link}" target="_blank">Click here to the case</a></li>'
-        #                 '</ul><br>'
-        #                 f'{answer}</div>', 
-        #                 unsafe_allow_html=True
-        #                             )
-        #         st.session_state[f"{case['cases_act']}"] = stream
-
-        # with tab5:
-        #     with st.spinner('Generating answers...'):
-        #         case2 = st.session_state.search_results[4]
-        #         chat_link = f'[Chat with this case!](http://localhost:8999/?case_act_no=changelater)'
-        #         raw_date = datetime.fromisoformat(case2["date"])
-        #         formatted_date = raw_date.strftime("%d %b, %Y")
-        #         year, court, case_number = case2['raw_case_num'].split("_")
-        #         link = f"https://www.hklii.hk/en/cases/{court.lower()}/{year}/{case_number}"
-        #         ans_box = st.empty()
-
-        #         # stream = []
-        #         if case2["cases_act"] in st.session_state:
-        #             stream = st.session_state[f"{case2['cases_act']}"]
-        #         else:
-        #             stream = []
-
-        #         for res in query_case(case2['cases_act'], query):
-        #             stream.append(res)
-        #             answer = "".join(stream).strip()
-        #             ans_box.markdown(
-        #                 f'<h3>{case2["cases_title"]}</h3>'
-        #                 '<ul>'
-        #                 f'<li>Date: {formatted_date}</li>'                        
-        #                 f'<li>Neutral Citation: {case2["neutral_cit"]}</li>'
-        #                 f'<li><a href="{link}" target="_blank">Click here to the case</a></li>'
-        #                 '</ul><br>'
-        #                 f'{answer}</div>', 
-        #                 unsafe_allow_html=True
-        #                             )
-        #         st.session_state[f"{case2['cases_act']}"] = stream
-
-
-        
+      
