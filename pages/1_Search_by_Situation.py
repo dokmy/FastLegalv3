@@ -24,7 +24,7 @@ try:
     pinecone_api_key = st.secrets["PINECONE_API_KEY"]
     pinecone_environment = st.secrets["PINECONE_ENVIRONMENT"]
 
-except (FileNotFoundError, KeyError):
+except:
     # Load from .env file for local development
     load_dotenv("./.env")
     openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -244,7 +244,7 @@ if submit_button:
         i = 0
         for case in st.session_state.search_results:
             i = i+1
-            with st.expander(f"Case {i}: {case['cases_act']}", expanded=True):
+            with st.expander(f"Case {i}: {case['cases_act']}"):
                 # button = st.button("Chat with this case!", key=f"{case_act_no}")
                 chat_link = f'[Chat with this case!](http://localhost:8999/?case_act_no=changelater)'
                 raw_date = datetime.fromisoformat(case["date"])
