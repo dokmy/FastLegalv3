@@ -202,10 +202,21 @@ with st.sidebar:
         max_value=today_date,
         format="DD/MM/YYYY"
     )
-    raw_min_date = time_range[0]
-    raw_max_date = time_range[1]
-    formatted_raw_min_date_str = raw_min_date.strftime("%d/%m/%Y")
-    formatted_raw_max_date_str = raw_max_date.strftime("%d/%m/%Y")
+    try:
+        raw_min_date = time_range[0]
+        raw_max_date = time_range[1]
+        formatted_raw_min_date_str = raw_min_date.strftime("%d/%m/%Y")
+        formatted_raw_max_date_str = raw_max_date.strftime("%d/%m/%Y")
+        min_date = formatted_raw_min_date_str.replace('/', '%2F')
+        max_date = formatted_raw_max_date_str.replace('/', '%2F')
+
+    except:
+        pass
+
+    # raw_min_date = time_range[0]
+    # raw_max_date = time_range[1]
+    # formatted_raw_min_date_str = raw_min_date.strftime("%d/%m/%Y")
+    # formatted_raw_max_date_str = raw_max_date.strftime("%d/%m/%Y")
 
     #Convert to search params
     cit = raw_cit.replace(" ", "+").replace('"','%22')
@@ -218,8 +229,8 @@ with st.sidebar:
     all_of_these_words = raw_all_of_these_words.replace(" ", "+").replace('"','%22')
     any_of_these_words = raw_any_of_these_words.replace(" ", "+").replace('"','%22')
     exact_phrase = raw_exact_phrase.replace(" ", "+").replace('"','%22')
-    min_date = formatted_raw_min_date_str.replace('/', '%2F')
-    max_date = formatted_raw_max_date_str.replace('/', '%2F')
+    # min_date = formatted_raw_min_date_str.replace('/', '%2F')
+    # max_date = formatted_raw_max_date_str.replace('/', '%2F')
 
     submit_kw_search_button = st.sidebar.button("Search", key="submit_kw_search_button")
 
