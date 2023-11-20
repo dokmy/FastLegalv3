@@ -13,7 +13,7 @@ from llama_index.vector_stores import PineconeVectorStore
 from llama_index.vector_stores.types import ExactMatchFilter, MetadataFilters
 import streamlit as st
 import json
-from datetime import datetime
+import datetime
 
 # load_dotenv("./.env")
 
@@ -108,7 +108,7 @@ def get_embedding(query):
     return response['data'][0]['embedding']
 
 
-def query_pinecone(query_embedding, filters):
+def query_pinecone(query_embedding, filters, min_date, max_date, sort_by):
     list_of_case_metadata = []
 
     index_name = "cases-index"
@@ -124,7 +124,9 @@ def query_pinecone(query_embedding, filters):
 
     results = pinecone_index.query(
         vector=query_embedding,
-        filter={"case_prefix": {"$in": filters}},
+        filter={
+            "case_prefix": {"$in": filters}
+            },
         top_k=50,
         include_metadata=True
     )
@@ -133,8 +135,20 @@ def query_pinecone(query_embedding, filters):
     for match in matches:
         node_content = json.loads(match['metadata']['_node_content'])
         case_metadata = node_content['metadata']
-        list_of_case_metadata.append(case_metadata)
-                                
+        case_date_str = case_metadata["date"].split("T")[0]
+        case_date_datetime = datetime.datetime.strptime(case_date_str, "%Y-%m-%d")
+        case_date = case_date_datetime.date()
+        case_metadata['case_date_for_sorting'] = case_date
+        if case_date > min_date and case_date < max_date:
+            list_of_case_metadata.append(case_metadata)
+            print(f"Found {len(list_of_case_metadata)} cases within time range.")
+
+    if sort_by == "Recency":
+        list_of_case_metadata = sorted(list_of_case_metadata, key=lambda x:x['case_date_for_sorting'], reverse=True)
+    
+    print("CHECKKKKKK")
+    for case_metadata in list_of_case_metadata:
+        print(case_metadata["date"])
     return list_of_case_metadata
 
 
@@ -171,6 +185,23 @@ with st.sidebar:
     user_input = st.sidebar.text_area("Be as specific as possible:", placeholder="E.g. My client slips and falls in a shopping mall while working...")
     st.markdown("**Select types of cases to search:**")
     
+    today = datetime.datetime.now()
+    many_years_ago = today - datetime.timedelta(days=25*365)
+    today_date = today.date()
+    many_years_ago_date = many_years_ago.date()
+    time_range = st.date_input(
+        'Pick a date range:', 
+        (many_years_ago_date, today),
+        min_value=datetime.date(1980, 1, 1),
+        max_value=today_date,
+        format="DD/MM/YYYY"
+    )
+    
+    sort_by = st.radio(
+        "Sort the results by:",["Relevance", "Recency"], index=0
+    )
+    st.write(sort_by)
+
     options1 = st.multiselect(
     'Court of Final Appeal',
     ['FACV','FACC','FAMV','FAMC','FAMP'],
@@ -211,6 +242,14 @@ with st.sidebar:
     'Others',
     ['CCDI','ESCC','ESS','FLCC','FLS','KCCC','KCS','KTCC','KTS','LBTC','OATD','STCC','STMP','STS','SCTC','TMCC','TMS','WKCC','WKS'],
     None)
+    
+    try:
+        min_date = time_range[0]
+        max_date = time_range[1]
+
+    except:
+        pass
+    # st.write(type(time_range[0]))
 
     filters = options1 + options2 + options3 + options4 + options5 + options6 + options7 + options8 + options9 + options10
     # st.write(filters)
@@ -227,7 +266,7 @@ if submit_button:
     
         query = user_input
         query_embedding = get_embedding(query)
-        list_of_case_metadata = query_pinecone(query_embedding, filters)
+        list_of_case_metadata = query_pinecone(query_embedding, filters, min_date, max_date, sort_by)
         # st.write(list_of_case_metadata)
         final_list_of_case_metadata = list_of_case_metadata[:5]
         st.session_state.search_results = final_list_of_case_metadata
@@ -243,7 +282,7 @@ if submit_button:
                     # Access the case using index 'i'
                     case = st.session_state.search_results[i]
                     chat_link = f'[Chat with this case!](http://localhost:8999/?case_act_no=changelater)'
-                    raw_date = datetime.fromisoformat(case["date"])
+                    raw_date = datetime.datetime.fromisoformat(case["date"])
                     formatted_date = raw_date.strftime("%d %b, %Y")
                     year, court, case_number = case['raw_case_num'].split("_")
                     link = f"https://www.hklii.hk/en/cases/{court.lower()}/{year}/{case_number}"
